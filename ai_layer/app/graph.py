@@ -4,6 +4,7 @@ from typing import Dict, List, Any, AsyncGenerator, Optional
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.config import get_stream_writer  # <-- add this
 
 from app.config import settings
 from app.schemas import (
@@ -26,6 +27,18 @@ def safe_json(text: str) -> Dict:
         return json.loads(text) if text else {}
     except json.JSONDecodeError:
         return {}
+
+
+def _get_user_context(state: GraphState) -> Optional[UserContext]:
+    ctx = state.get("user_context")
+    if ctx is None:
+        return None
+    if isinstance(ctx, dict):
+        try:
+            return UserContext(**ctx) if ctx else None
+        except Exception:
+            return None
+    return ctx
 
 
 def _build_patient_context_str(user_context: Optional[UserContext]) -> str:
@@ -75,7 +88,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         return {"intent": intent_enum, "intent_confidence": conf, "messages": history, "backend_commands": [], "red_flags": []}
 
     async def wellbeing_node(state: GraphState) -> Dict[str, Any]:
-        patient_ctx = _build_patient_context_str(state.get("user_context"))
+        patient_ctx = _build_patient_context_str(_get_user_context(state))
         system_prompt = WELLBEING_SYSTEM_PROMPT + patient_ctx
         history: List[Dict[str, str]] = list(state.get("messages") or [])
         messages = [{"role": "system", "content": system_prompt}] + history[-6:]
@@ -92,7 +105,8 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
         return {"symptom_entities": symptoms}
 
-    async def red_flag_node(state: GraphState) -> AsyncGenerator[Dict[str, Any], None]:
+    async def red_flag_node(state: GraphState) -> Dict[str, Any]:
+        write = get_stream_writer()  # get the injected stream writer
         symptoms = state.get("symptom_entities")
         flags = evaluate_red_flags(symptoms) if symptoms else []
 
@@ -116,20 +130,21 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 alert = RedFlagAlert(red_flags=flags, message=msg)
                 update["alert_payload"] = alert
                 update["backend_commands"].append(BackendCommand(command_type="ALERT_DOCTOR", payload=alert.model_dump()).model_dump())
-                yield {"type": "alert", "payload": alert.model_dump()}
+                write({"type": "alert", "payload": alert.model_dump()})
             else:
                 update["response_text"] = f"Обратите внимание: {', '.join(f.name for f in flags)}."
                 update["response_type"] = ResponseType.text_with_buttons
                 update["buttons"].append(Button(label="Связаться с врачом", payload={"action": "call_doctor"}).model_dump())
-                yield {"type": "buttons", "payload": update["buttons"]}
+                write({"type": "buttons", "payload": update["buttons"]})
         else:
             update["response_text"] = "Спасибо, что поделились самочувствием."
 
         history: List[Dict[str, str]] = list(state.get("messages") or [])
         update["messages"] = history + [{"role": "assistant", "content": update["response_text"]}]
-        yield {"type": "state_update", **update}
+        return update  # return state update normally
 
-    async def data_input_node(state: GraphState) -> AsyncGenerator[Dict[str, Any], None]:
+    async def data_input_node(state: GraphState) -> Dict[str, Any]:
+        write = get_stream_writer()
         messages = [
             {"role": "system", "content": DATA_INPUT_SYSTEM_PROMPT},
             {"role": "user", "content": state["user_message"]}
@@ -142,51 +157,76 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
         data = safe_json(resp_text)
         cmd = BackendCommand(command_type="SAVE_DIARY_ENTRY", payload=data).model_dump()
-        yield {"type": "commands", "payload": [cmd]}
+        write({"type": "commands", "payload": [cmd]})
 
         history: List[Dict[str, str]] = list(state.get("messages") or [])
         response_text = "Данные сохранены в дневник."
-        yield {
-            "type": "state_update",
+        return {
             "response_text": response_text,
             "response_type": ResponseType.text,
             "messages": history + [{"role": "assistant", "content": response_text}],
             "backend_commands": [cmd]
         }
 
-    async def education_node(state: GraphState) -> AsyncGenerator[Dict[str, Any], None]:
-        collections = ["stroke_types", "medications", "rehabilitation", "risk_factors"]
+    async def education_node(state: GraphState) -> Dict[str, Any]:
+        write = get_stream_writer()
+        collections = ["stroke_clinrecs"]
         docs = []
         scores = []
-        user_ctx = state.get("user_context", UserContext())
+        user_ctx = _get_user_context(state)
         subtype = user_ctx.stroke_subtype if user_ctx else None
 
         for coll in collections:
+            info = await rag_service.qdrant_client.get_collection(coll)
+            logger.info(f"Vectors config: {info.config.params.vectors}")
             try:
-                res = await rag_service.search(coll, state["user_message"], stroke_subtype=subtype)
-                docs.extend(res)
-                scores.extend([d["score"] for d in res])
-            except Exception:
-                pass
+                info = await rag_service.qdrant_client.get_collection(coll)
+                logger.info(f"Collection '{coll}' info: points_count={info.points_count}")
 
+                sample = await rag_service.qdrant_client.scroll(
+                    collection_name=coll,
+                    limit=1,
+                    with_payload=True,
+                    with_vectors=True
+                )
+                if sample[0]:
+                    p = sample[0][0]
+                    test_query = p.payload['content'][50:150].strip()
+                    logger.info(f"Test query: {test_query}")
+                    test_res = await rag_service.qdrant_client.query_points(
+                        collection_name=coll,
+                        query=await rag_service.llm_handler.get_embedding(test_query),
+                        using="dense",
+                        limit=3,
+                        score_threshold=0.0,
+                        with_payload=False
+                    )
+                    logger.info(f"Self-search result: {test_res}")
+            except Exception as e:
+                logger.error(f"Failed to get collection info for '{coll}': {e}")
+
+            # без try/except чтобы увидеть реальную ошибку
+            res = await rag_service.search(coll, state["user_message"], stroke_subtype=subtype)
+            docs.extend(res)
+            scores.extend([d["score"] for d in res])
+
+        logger.info(f"RAG Results: {docs}")
         rag_conf = max(scores) if scores else 0.0
 
-        if rag_conf < 0.65:
+        if rag_conf < 0.2:
             fallback_text = "К сожалению, точной информации не найдено. Вот общая памятка."
             buttons = [Button(label="Общая памятка", payload={"action": "guide"}).model_dump()]
-            yield {"type": "buttons", "payload": buttons}
-            yield {"type": "token", "content": fallback_text}
-            yield {
-                "type": "state_update",
+            write({"type": "buttons", "payload": buttons})
+            write({"type": "token", "content": fallback_text})
+            return {
                 "response_text": fallback_text,
                 "response_type": ResponseType.text_with_buttons,
                 "buttons": buttons,
                 "backend_commands": []
             }
-            return
 
         context = "\n\n".join([d["content"] for d in docs[:5]])
-        patient_ctx = _build_patient_context_str(state.get("user_context"))
+        patient_ctx = _build_patient_context_str(user_ctx)
         sys_prompt = f"{EDUCATION_SYSTEM_PROMPT}\nКонтекст: {context}{patient_ctx}"
         history: List[Dict[str, str]] = list(state.get("messages") or [])
         messages = [{"role": "system", "content": sys_prompt}] + history
@@ -194,21 +234,21 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         try:
             async for token in llm_handler.chat_completion_stream(messages):
                 full_text += token
-                yield {"type": "token", "content": token}
+                write({"type": "token", "content": token})
         except Exception as e:
             logger.error(f"Education Stream Error: {e}")
             full_text = "Произошла ошибка при генерации ответа."
 
-        yield {
-            "type": "state_update",
+        return {
             "response_text": full_text,
             "response_type": ResponseType.text,
             "messages": history + [{"role": "assistant", "content": full_text}],
             "backend_commands": []
         }
 
-    async def emotional_node(state: GraphState) -> AsyncGenerator[Dict[str, Any], None]:
-        patient_ctx = _build_patient_context_str(state.get("user_context"))
+    async def emotional_node(state: GraphState) -> Dict[str, Any]:
+        write = get_stream_writer()
+        patient_ctx = _build_patient_context_str(_get_user_context(state))
         system_prompt = EMOTIONAL_SYSTEM_PROMPT + patient_ctx
         history: List[Dict[str, str]] = list(state.get("messages") or [])
         messages = [{"role": "system", "content": system_prompt}] + history
@@ -216,21 +256,21 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         try:
             async for token in llm_handler.chat_completion_stream(messages):
                 full_text += token
-                yield {"type": "token", "content": token}
+                write({"type": "token", "content": token})
         except Exception as e:
             logger.error(f"Emotional Stream Error: {e}")
             full_text = "Я здесь, чтобы выслушать вас."
 
-        yield {
-            "type": "state_update",
+        return {
             "response_text": full_text,
             "response_type": ResponseType.text,
             "messages": history + [{"role": "assistant", "content": full_text}],
             "backend_commands": []
         }
 
-    async def reminder_node(state: GraphState) -> AsyncGenerator[Dict[str, Any], None]:
-        patient_ctx = _build_patient_context_str(state.get("user_context"))
+    async def reminder_node(state: GraphState) -> Dict[str, Any]:
+        write = get_stream_writer()
+        patient_ctx = _build_patient_context_str(_get_user_context(state))
         system_prompt = REMINDER_SYSTEM_PROMPT + patient_ctx
         messages = [
             {"role": "system", "content": system_prompt},
@@ -244,12 +284,11 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
         data = safe_json(resp_text)
         cmd = BackendCommand(command_type="UPSERT_REMINDER", payload=data).model_dump()
-        yield {"type": "commands", "payload": [cmd]}
+        write({"type": "commands", "payload": [cmd]})
 
         history: List[Dict[str, str]] = list(state.get("messages") or [])
         response_text = "Напоминание сохранено."
-        yield {
-            "type": "state_update",
+        return {
             "response_text": response_text,
             "response_type": ResponseType.text,
             "messages": history + [{"role": "assistant", "content": response_text}],
@@ -323,6 +362,5 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
 async def run_graph(input_data: Dict[str, Any], config: Dict[str, Any], *, graph) -> AsyncGenerator[Dict, None]:
     async for event in graph.astream(input_data, config, stream_mode="custom"):
-        if event.get("type") != "state_update":
+        if isinstance(event, dict):
             yield event
-    yield {"type": "done"}

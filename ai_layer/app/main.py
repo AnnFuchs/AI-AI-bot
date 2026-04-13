@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     llm_handler = LLMHandler()
     qdrant_client = AsyncQdrantClient(url=settings.QDRANT_URL)
     rag_service = RAGService(qdrant_client=qdrant_client, llm_handler=llm_handler)
-    graph = build_workflow()
+    graph = build_workflow(llm_handler=llm_handler, rag_service=rag_service)
 
     app.state.llm_handler = llm_handler
     app.state.qdrant_client = qdrant_client
@@ -54,7 +54,7 @@ class ChatRequest(BaseModel):
     user_context: UserContext
 
 
-async def event_generator(request: ChatRequest, rag_service: RAGService, llm_handler: LLMHandler, graph) -> AsyncGenerator[str, None]:
+async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, None]:
     input_data = {
         "user_id": request.user_id,
         "session_id": request.session_id,
@@ -67,25 +67,25 @@ async def event_generator(request: ChatRequest, rag_service: RAGService, llm_han
     }
 
     try:
-        async for event in run_graph(input_data, config, graph=graph, rag_service=rag_service, llm_handler=llm_handler):
+        async for event in run_graph(input_data, config, graph=graph):
             event_type = event.get("type")
 
             if event_type == "token":
-                yield f"data: {json.dumps({'type': 'token', 'content': event.get('content', '')})}\n\n"
+                yield f"data: {json.dumps({'type': 'token', 'content': event.get('content', '')}, ensure_ascii=False)}\n\n"
             elif event_type == "commands":
-                yield f"data: {json.dumps({'type': 'commands', 'payload': event.get('payload')})}\n\n"
+                yield f"data: {json.dumps({'type': 'commands', 'payload': event.get('payload')}, ensure_ascii=False)}\n\n"
             elif event_type == "alert":
-                yield f"data: {json.dumps({'type': 'alert', 'payload': event.get('payload')})}\n\n"
+                yield f"data: {json.dumps({'type': 'alert', 'payload': event.get('payload')}, ensure_ascii=False)}\n\n"
             elif event_type == "buttons":
-                yield f"data: {json.dumps({'type': 'buttons', 'payload': event.get('payload')})}\n\n"
+                yield f"data: {json.dumps({'type': 'buttons', 'payload': event.get('payload')}, ensure_ascii=False)}\n\n"
             elif event_type == "error":
-                yield f"data: {json.dumps({'type': 'error', 'message': event.get('message')})}\n\n"
+                yield f"data: {json.dumps({'type': 'error', 'message': event.get('message')}, ensure_ascii=False)}\n\n"
 
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
     except Exception as e:
         logger.error(f"Stream error: {e}")
-        yield f"data: {json.dumps({'type': 'error', 'message': 'Internal Server Error'})}\n\n"
-        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        yield f"data: {json.dumps({'type': 'error', 'message': 'Internal Server Error'}, ensure_ascii=False)}\n\n"
+        yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
 
 
 @app.post("/chat/stream")
@@ -93,11 +93,9 @@ async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(
         event_generator(
             request,
-            rag_service=app.state.rag_service,
-            llm_handler=app.state.llm_handler,
             graph=app.state.graph
         ),
-        media_type="text/event-stream"
+        media_type="text/event-stream; charset=utf-8"
     )
 
 

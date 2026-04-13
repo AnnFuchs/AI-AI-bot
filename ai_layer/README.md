@@ -254,14 +254,14 @@ data: {"type": "done"}
 
 ```bash
 # 1. Установить зависимости
-pip install -r ai-layer/requirements.txt
+pip install -r ai_layer/requirements.txt
 
 # 2. Создать .env файл
-cp ai-layer/.env.example ai-layer/.env
+cp ai_layer/.env.example ai_layer/.env
 # Заполнить OPENAI_API_KEY и QDRANT_URL
 
 # 3. Запустить сервис
-cd ai-layer
+cd ai_layer
 uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
@@ -274,14 +274,14 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 Сборка и запуск как отдельный контейнер:
 
 ```bash
-docker build -t ai-layer ./ai-layer
-docker run -p 8001:8001 --env-file ./ai-layer/.env ai-layer
+docker build -t ai_layer ./ai_layer
+docker run -p 8001:8001 --env-file ./ai_layer/.env ai_layer
 ```
 
 Или через `docker-compose` из корня проекта (сервис определён как `ai-layer` в `docker-compose.yml`):
 
 ```bash
-docker-compose up ai-layer
+docker-compose up ai_layer
 ```
 
 ---
@@ -291,7 +291,7 @@ docker-compose up ai-layer
 Скрипт `scripts/ingest.py` загружает документы форматов `.txt`, `.md` или `.pdf`, разбивает их на чанки (1000 символов, перекрытие 200), генерирует эмбеддинги через OpenAI и загружает их в коллекцию Qdrant.
 
 ```bash
-cd ai-layer
+cd ai_layer
 python -m scripts.ingest --folder ./data/stroke_types --collection stroke_types
 python -m scripts.ingest --folder ./data/medications   --collection medications
 python -m scripts.ingest --folder ./data/rehab         --collection rehabilitation
@@ -303,7 +303,7 @@ python -m scripts.ingest --folder ./data/risk_factors  --collection risk_factors
 ## Тесты
 
 ```bash
-cd ai-layer
+cd ai_layer
 pytest tests/
 ```
 

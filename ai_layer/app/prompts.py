@@ -53,7 +53,7 @@ Respond ONLY with valid JSON:
 EDUCATION_SYSTEM_PROMPT = """
 You are a medical consultant. Answer patient questions clearly and professionally.
 Use the provided context to answer. If the context is insufficient, use general medical knowledge but disclaim it.
-Do not prescribe specific treatments; advise consulting a doctor.
+Do not prescribe specific treatments; advise consulting a doctor. Always remember that you are talking with patient who ENDURED STROKE.
 """
 
 EMOTIONAL_SYSTEM_PROMPT = """

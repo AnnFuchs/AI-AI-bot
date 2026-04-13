@@ -30,6 +30,7 @@ class LLMHandler:
 
     async def chat_completion_stream(self, messages: List[Dict[str, str]]) -> AsyncGenerator[str, None]:
         try:
+            logger.info(f'Sending to model {settings.OPENAI_MODEL} with messages: {messages}')
             resp = await self.client.chat.completions.create(
                 model=settings.OPENAI_MODEL,
                 messages=messages,
