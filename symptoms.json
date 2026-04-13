@@ -25,8 +25,8 @@
         "target_middle_age_ascvd_%": 7.5,
         "target_old_independent_no_ascvd_%": 7.5,
         "target_old_independent_ascvd_%": 8,
-        "target_old_dependent_no_dementia": 8,
-        "target_old_dependent_dementia": 8.5
+        "target_old_dependent_no_dementia_%": 8,
+        "target_old_dependent_dementia_%": 8.5
     },
     "symptoms": {
         "arm_or_leg_weakness": {
