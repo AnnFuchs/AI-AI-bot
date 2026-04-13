@@ -1,0 +1,69 @@
+{
+    "blood_pressure":{
+        "systolic_target": 130,
+        "diastolic_target": 80,
+        "systolic_target_old": 140,
+        "diastolic_target_old": 90,
+        "systolic_target_stenosis": 150,
+        "diastolic_target_stenosis": 90,
+        "red_flag":{
+            "systolic_red_flag": 180,
+            "diastolic_red_flag": 120
+        }
+    },
+    "LDL": {
+        "target_mmol":{
+            "moderate_risk": 1.4,
+            "extreme_risk": 1,
+            "personal": "50%"
+        }
+    },
+    "HbA1c_level":{
+        "target_young_no_ascvd_%": 6.5,
+        "target_young_ascvd_%": 7,
+        "target_middle_age_no_ascvd_%": 7,
+        "target_middle_age_ascvd_%": 7.5,
+        "target_old_independent_no_ascvd_%": 7.5,
+        "target_old_independent_ascvd_%": 8,
+        "target_old_dependent_no_dementia": 8,
+        "target_old_dependent_dementia": 8.5
+    },
+    "symptoms": {
+        "arm_or_leg_weakness": {
+            "red_flag": "new localisation or sudden worsening"
+        },
+        "face_asymmetry":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "balance_loss":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "numbness": {
+            "red_flag": "new localisation or sudden worsening"
+        },
+        "vision_changes":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "dysphagia":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "confusion":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "disorientation":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "speech_change":{
+            "red_flag": "new onset or sudden worsening"
+        },
+        "headache":{
+            "red_flag": "new severety, abrupt onset, changed pattern"
+        },
+        "depression":{
+            "red_flag": "suicidality"
+        },
+        "weight_loss":{
+            "yellow_flag": "noticeable drop in weight"
+        }
+    }
+}
