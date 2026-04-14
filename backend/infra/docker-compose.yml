@@ -1,8 +1,8 @@
-name: cafe_booking
+name: AI-AI assistant
 
 services:
   db:
-    image: postgres:17-alpine
+    image: postgres:16-alpine
     env_file:
       - ./.env
     environment:

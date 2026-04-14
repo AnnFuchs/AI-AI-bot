@@ -4,12 +4,41 @@ from fastapi import HTTPException, status
 
 
 class Role(StrEnum):
-    """Роль пользователя в системе."""
+    """User role."""
 
     PATIENT = 'patient'
     RELATIVE = 'relative'
     DOCTOR = 'doctor'
     ADMIN = 'admin'
+
+
+class StrokeType(StrEnum):
+    """Type of stroke."""
+
+    ISCHEMIC = 'ischemic'
+    HEMORRHAGIC = 'hemorrhagic'
+    UNKNOWN = 'unknown'
+
+
+class Sex(StrEnum):
+    """Patient sex."""
+
+    M = 'male'
+    F = 'female'
+    UNKNOWN = 'unknown'
+
+
+class EntryType(StrEnum):
+    """Type of dieary entry."""
+
+    BP = 'blood_pressure'
+    BLOOD_TEST = 'blood_test'
+    MEDICATION = 'medication'
+
+
+PHONE_LEN = 16
+EMAIL_LEN = 254
+PASSW_HASH_LEN = 256
 
 
 JWT_LIFE = 3600
