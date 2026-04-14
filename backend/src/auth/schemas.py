@@ -1,13 +1,4 @@
-from pydantic import BaseModel, ConfigDict, SecretStr
-
-
-class AuthData(BaseModel):
-    """Схема аутентификации."""
-
-    login: str
-    password: SecretStr
-
-    model_config = ConfigDict(extra='forbid')
+from pydantic import BaseModel, ConfigDict
 
 
 class AuthToken(BaseModel):

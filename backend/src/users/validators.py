@@ -8,7 +8,7 @@ from src.users.errors import DuplicateInfoError
 from src.users.models import User
 
 
-async def check_user_exists(user_id: int, session: AsyncSession) -> User:
+async def check_user_exists(user_id: UUID, session: AsyncSession) -> User:
     """Return the user object if it already exists in the database.
 
     Raises HttpException with HttpStatus.NOT_FOUND if not found.

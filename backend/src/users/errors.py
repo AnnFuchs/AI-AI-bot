@@ -1,4 +1,4 @@
 class DuplicateInfoError(ValueError):
-    """Ошибка дублирования данных при создании и обновлении модели."""
+    """Data duplication error on creating or updating a model."""
 
     pass

@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.password import verify_password
+from src.core.logger import logger
 from src.users.models import User
 
 
@@ -16,20 +17,25 @@ class AuthService:
         session: AsyncSession,
     ) -> User | None:
         """Аутентификация пользователей."""
-        if '@' in login:
-            user = await session.scalar(
-                select(User).where(User.email == login),
-            )
-        else:
-            user = await session.scalar(
+        user = await session.scalar(
                 select(User).where(User.phone == login),
             )
 
-        if not user or not verify_password(
+        if not user:
+            logger.warning("Auth failed: user not found (login=%s)", login)
+            return None
+
+        if not verify_password(
             plain_password=password.get_secret_value(),
             hashed_password=user.hashed_password,
         ):
+            logger.warning("Auth failed: invalid password (login=%s)", login)
             return None
+
+        if not user.is_active:
+            logger.warning("Auth failed: inactive account (login=%s)", login)
+            return None
+
         return user
 
 
