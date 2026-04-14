@@ -20,6 +20,23 @@ class StrokeType(StrEnum):
     UNKNOWN = 'unknown'
 
 
+class StrokeTOASTSubType(StrEnum):
+    """Ischenic stroke subtype."""
+
+    LAA = 'large-artery atherosclerosis'
+    CE = 'cardioembolism'
+    LACUNAR = 'small-vessel occlusion'
+    OTHERDETERM = 'stroke of other determined etiology'
+    OTHERUNDETERM = 'stroke of undetermined etiology'
+
+
+class StrokeHemSubType(StrEnum):
+    """Hemorrhagic stroke subtype."""
+
+    ICH = 'intracerebral hemorrhage'
+    SAH = 'subarachnoid hemorrhage'
+
+
 class Sex(StrEnum):
     """Patient sex."""
 
@@ -29,11 +46,20 @@ class Sex(StrEnum):
 
 
 class EntryType(StrEnum):
-    """Type of dieary entry."""
+    """Type of diary entry."""
 
     BP = 'blood_pressure'
     BLOOD_TEST = 'blood_test'
     MEDICATION = 'medication'
+    SYMPTOM = 'symptom'
+
+
+class AgeGroup(StrEnum):
+    """Patient age group."""
+
+    YOUNG = '18-44'
+    MIDDLE = '45-65'
+    OLD = '65+'
 
 
 PHONE_LEN = 16

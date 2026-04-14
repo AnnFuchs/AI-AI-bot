@@ -11,6 +11,8 @@ from src.core.constants import (
     EntryType,
     Role,
     Sex,
+    StrokeHemSubType,
+    StrokeTOASTSubType,
     StrokeType,
 )
 from src.db.base import Base, CommonMixin
@@ -67,10 +69,26 @@ class User(CommonMixin, Base):
         default=StrokeType.UNKNOWN,
         nullable=False,
     )
+    stroke_toast_subtype: Mapped[StrokeTOASTSubType] = mapped_column(
+        Enum(StrokeTOASTSubType, name='subtype_toast_enum'),
+    )
+    stroke_hemo_subtype: Mapped[StrokeHemSubType] = mapped_column(
+        Enum(StrokeHemSubType, name='subtype_hem_enum'),
+    )
+    medications: Mapped[list] = mapped_column(
+        JSON,
+        nullable=False,
+        default=list,
+    )
     diary_entries: Mapped[list["DiaryEntry"]] = relationship(
         back_populates='user',
         cascade='all, delete-orphan',
         lazy='selectin',
+    )
+    known_symptoms: Mapped[list[str]] = mapped_column(
+        JSON,
+        default=list,
+        nullable=False,
     )
 
 
@@ -87,6 +105,7 @@ class DiaryEntry(CommonMixin, Base):
     entry_type: Mapped[EntryType] = mapped_column(
         Enum(EntryType, name='entry_type_enum'),
         nullable=False,
+        index=True,
     )
     entry_json: Mapped[dict] = mapped_column(
         JSON,

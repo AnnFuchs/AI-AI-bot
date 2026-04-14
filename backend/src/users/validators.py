@@ -9,34 +9,32 @@ from src.users.models import User
 
 
 async def check_user_exists(user_id: int, session: AsyncSession) -> User:
-    """Возвращает объект пользователя, если он уже существует в базе данных.
+    """Return the user object if it already exists in the database.
 
-    В противном случае вызввает HTTPException с HTTPStatus.NOT_FOUND
+    Raises HttpException with HttpStatus.NOT_FOUND if not found.
     """
     user = await session.get(User, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Пользователь не найден',
+            detail='User not found',
         )
     return user
 
 
 async def check_duplicate(
-    username: str | None,
-    email: str | None,
     phone: str | None,
+    email: str | None,
     session: AsyncSession,
     exclude_id: UUID | None = None,
 ) -> None:
-    """Проверяет, нет ли в базе данных пользователя с переданными данными."""
+    """Check is there a user with those email or phone."""
     checks = [
-        (username, User.username, 'Имя пользователя занято.'),
-        (email, User.email, 'Пользователь с таким email уже зарегистрирован.'),
+        (email, User.email, 'User with this email already exists.'),
         (
             phone,
             User.phone,
-            'Пользователь с таким номером телефона уже зарегистрирован.',
+            'User with this phone number already exists.',
         ),
     ]
 
