@@ -1,6 +1,5 @@
 import re
-from datetime import date, datetime
-from typing import Any
+from datetime import date
 from uuid import UUID
 
 from pydantic import (
@@ -15,7 +14,6 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.core.constants import (
     AgeGroup,
-    EntryType,
     Role,
     Sex,
     StrokeHemSubType,
@@ -138,23 +136,3 @@ class AssignDoctorUpdate(BaseModel):
     doctor_id: str | None = None
 
     model_config = ConfigDict(extra='forbid')
-
-
-class DiaryEntryCreate(BaseModel):
-    """Pydantic-schema for dairy entry creation."""
-
-    entry_type: EntryType
-    entry_json: dict[str, Any]
-
-    model_config = ConfigDict(extra='forbid')
-
-
-class DiaryEntryInfo(BaseModel):
-    """Pydantic-schema for diary entry read."""
-
-    user_id: UUID
-    created_at: datetime
-    entry_type: EntryType
-    entry_json: dict[str, Any]
-
-    model_config = ConfigDict(from_attributes=True)

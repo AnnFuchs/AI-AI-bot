@@ -1,7 +1,9 @@
-from datetime import date
-from uuid import UUID
+from __future__ import annotations
 
-from sqlalchemy import JSON, Boolean, Date, Enum, ForeignKey, String
+from datetime import date
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, Boolean, Date, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.constants import (
@@ -9,7 +11,6 @@ from src.core.constants import (
     EMAIL_LEN,
     PASSW_HASH_LEN,
     PHONE_LEN,
-    EntryType,
     Role,
     Sex,
     StrokeHemSubType,
@@ -17,6 +18,9 @@ from src.core.constants import (
     StrokeType,
 )
 from src.db.base import Base, CommonMixin
+
+if TYPE_CHECKING:
+    from src.diary.models import DiaryEntry
 
 
 class User(CommonMixin, Base):
@@ -99,26 +103,4 @@ class User(CommonMixin, Base):
     doctor_id: Mapped[str] = mapped_column(
         String(DOC_ID_LEN),
         nullable=True,
-    )
-
-
-class DiaryEntry(CommonMixin, Base):
-    """Single patient log entry."""
-
-    __tablename__ = 'diary_entries'
-
-    user_id: Mapped[UUID] = mapped_column(
-        ForeignKey('users.id'),
-        nullable=False,
-    )
-    user: Mapped['User'] = relationship(back_populates='diary_entries')
-    entry_type: Mapped[EntryType] = mapped_column(
-        Enum(EntryType, name='entry_type_enum'),
-        nullable=False,
-        index=True,
-    )
-    entry_json: Mapped[dict] = mapped_column(
-        JSON,
-        default=dict,
-        nullable=False,
     )

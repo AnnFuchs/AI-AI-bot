@@ -1,15 +1,12 @@
-from uuid import UUID
-
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.password import get_password_hash
 from src.users.errors import DuplicateInfoError, InactiveUserError
-from src.users.models import DiaryEntry, User
+from src.users.models import User
 from src.users.schemas import (
     AssignDoctorUpdate,
-    DiaryEntryCreate,
     UserCreate,
     UserUpdate,
 )
@@ -108,46 +105,4 @@ class UserService:
         return db_user
 
 
-class DiaryEntryService:
-    """C from CRUD for diary entry."""
-
-    async def create(
-        self, data: DiaryEntryCreate, user_id: UUID, session: AsyncSession,
-    ) -> DiaryEntry:
-        """Create diary entry."""
-        entry_dict = data.model_dump()
-        entry_dict['user_id'] = user_id
-
-        entry = DiaryEntry(**entry_dict)
-        session.add(entry)
-
-        # user = await session.get(User, user_id)
-        # new_symptoms = extract_symptoms_from_entry(
-        #    entry.entry_json, data.entry_type
-        # )
-        # user.known_symptoms = list(
-        #     set(user.known_symptoms) | set(new_symptoms)
-        # )
-
-        try:
-            await session.commit()
-        except IntegrityError:
-            await session.rollback()
-            raise ValueError(
-                'Failed to create diary entry.'
-                'Check user_id or data format.',
-            )
-
-        await session.refresh(entry)
-        return entry
-
-    async def delete(
-        self, db_entry: DiaryEntry, session: AsyncSession,
-    ) -> None:
-        """Hard delete diary entry from the database."""
-        await session.delete(db_entry)
-        await session.commit()
-
-
 user_service = UserService()
-diary_entry_service = DiaryEntryService()

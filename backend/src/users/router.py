@@ -17,7 +17,7 @@ from src.users.schemas import (
 from src.users.service import user_service
 from src.users.validators import check_user_exists
 
-router = APIRouter(prefix='/users', tags=['Пользователи'])
+router = APIRouter(prefix='/users', tags=['Users'])
 
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 
