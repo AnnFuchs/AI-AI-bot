@@ -1,10 +1,11 @@
 from pydantic import BaseModel, ConfigDict, SecretStr
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class AuthData(BaseModel):
     """Auth scheme."""
 
-    login: str
+    login: PhoneNumber
     password: SecretStr
 
     model_config = ConfigDict(extra='forbid')

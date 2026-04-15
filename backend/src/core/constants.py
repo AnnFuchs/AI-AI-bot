@@ -62,7 +62,7 @@ class AgeGroup(StrEnum):
     OLD = '65+'
 
 
-PHONE_LEN = 16
+PHONE_LEN = 32
 EMAIL_LEN = 254
 PASSW_HASH_LEN = 256
 DOC_ID_LEN = 8

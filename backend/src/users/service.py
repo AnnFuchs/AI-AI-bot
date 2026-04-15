@@ -1,3 +1,4 @@
+from pydantic_extra_types.phone_numbers import PhoneNumber
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +19,7 @@ class UserService:
 
     async def get_by_login(
         self,
-        login: str,
+        login: PhoneNumber,
         session: AsyncSession,
     ) -> User | None:
         """Get active user by phone number."""
