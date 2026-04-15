@@ -12,7 +12,7 @@ from src.core.constants import REFRESH_TOKEN_LIFE, TOKEN_TYPE
 from src.db.session import get_async_session
 from src.users.models import User
 
-router = APIRouter(prefix='/auth', tags=['Аутентификация'])
+router = APIRouter(prefix='/auth', tags=['Auth'])
 
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 

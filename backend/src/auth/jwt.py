@@ -25,9 +25,9 @@ def create_refresh_token(data: dict) -> tuple[str, str]:
     to_encode = data.copy()
     jti = str(uuid4())
     expire = datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_LIFE)
-    to_encode.update({"exp": expire, "jti": jti, "type": "refresh"})
+    to_encode.update({'exp': expire, 'jti': jti, 'type': 'refresh'})
     auth_data = settings.jwt_auth_data
     return jwt.encode(
         to_encode,
-        auth_data["secret_key"],
-        algorithm=auth_data["algorithm"]), jti
+        auth_data['secret_key'],
+        algorithm=auth_data['algorithm']), jti

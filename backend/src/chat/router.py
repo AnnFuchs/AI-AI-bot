@@ -34,7 +34,7 @@ async def chat_stream(
         'user_context': user_context.model_dump(mode="json"),
     }
 
-    async def event_stream() -> AsyncGenerator:
+    async def event_stream() -> AsyncGenerator[str, None]:
         try:
             async with httpx.AsyncClient(timeout=60) as client:
                 async with client.stream(
@@ -65,7 +65,9 @@ async def chat_stream(
                             continue
 
                         yield (
-                            f'data: {json.dumps(event, ensure_ascii=False)}\n'
+                            f'data: {
+                                json.dumps(event, ensure_ascii=False)
+                            }\n\n'
                         )
 
         except httpx.RequestError:

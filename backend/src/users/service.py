@@ -46,7 +46,7 @@ class UserService:
             await session.commit()
         except IntegrityError:
             await session.rollback()
-            raise DuplicateInfoError('User alredy exists.')
+            raise DuplicateInfoError('User already exists.')
 
         await session.refresh(user)
         return user
@@ -93,7 +93,7 @@ class UserService:
         await session.refresh(db_user)
         return db_user
 
-    async def delete(self, db_user: User, session: AsyncSession) -> User:
+    async def delete(self, db_user: User, session: AsyncSession) -> None:
         """Soft delete user by setting is_active to False."""
         if not db_user.is_active:
             raise InactiveUserError("User is already deactivated.")
@@ -101,8 +101,6 @@ class UserService:
         db_user.is_active = False
         session.add(db_user)
         await session.commit()
-        await session.refresh(db_user)
-        return db_user
 
 
 user_service = UserService()

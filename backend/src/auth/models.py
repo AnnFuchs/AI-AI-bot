@@ -14,7 +14,7 @@ class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id"), nullable=False,
+        ForeignKey('users.id'), nullable=False,
     )
     token_jti: Mapped[str] = mapped_column(
         String(JTI_LEN), unique=True, nullable=False,

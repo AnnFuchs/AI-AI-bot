@@ -13,9 +13,10 @@ def _get_age_category(dob: date | None) -> AgeGroup | None:
         return None
     today = date.today()
     age = (
-        today.year -
-        dob.year -
-        ((today.month, today.day) < (dob.month, dob.day))
+        today.year
+        - dob.year
+        # subtract 1 if birthday hasn't occurred yet this year
+        - ((today.month, today.day) < (dob.month, dob.day))
     )
 
     if age < 45:

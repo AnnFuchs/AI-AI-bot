@@ -24,15 +24,16 @@ class DiaryEntryService:
 
         Optionally filtered by type.
         """
+        query = select(DiaryEntry).where(DiaryEntry.user_id == user_id)
+        if entry_type is not None:
+            query = query.where(DiaryEntry.entry_type == entry_type)
         query = (
-            select(DiaryEntry)
-            .where(DiaryEntry.user_id == user_id)
+            query
             .order_by(DiaryEntry.created_at.desc())
             .limit(limit)
             .offset(offset)
         )
-        if entry_type is not None:
-            query = query.where(DiaryEntry.entry_type == entry_type)
+
         result = await session.execute(query)
         return list(result.scalars().all())
 
@@ -51,7 +52,7 @@ class DiaryEntryService:
         except IntegrityError:
             await session.rollback()
             raise ValueError(
-                'Failed to create diary entry.'
+                'Failed to create diary entry. '
                 'Check user_id or data format.',
             )
 

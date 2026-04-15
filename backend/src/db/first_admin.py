@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
+from src.core.logger import logger
 from src.users.errors import DuplicateInfoError
 from src.users.schemas import AdminUserCreate
 from src.users.service import user_service
@@ -8,17 +9,18 @@ from src.users.service import user_service
 
 async def create_first_admin(
     session: AsyncSession,
-    login: str = settings.first_superuser_login,
-    password: str = settings.first_superuser_password,
+    phone: str = settings.first_superuser_phone,
+    password: str = settings.first_superuser_password.get_secret_value(),
 ) -> None:
-    """Автоматизация создания первого админа."""
+    """Create the first superuser on application startup."""
     try:
         await user_service.create(
             AdminUserCreate(
-                email=login,
+                phone=phone,
                 password=password,
             ),
             session,
         )
+        logger.info('First admin created successfully.')
     except DuplicateInfoError as e:
-        print(str(e))  # Здесь будет логирование
+        logger.info('First admin already exists: %s', e)

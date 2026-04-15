@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from pydantic import EmailStr, SecretStr, field_validator
+from pydantic import SecretStr, field_validator
+from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).parent.parent
@@ -47,10 +48,10 @@ class Settings(BaseSettings):
             'algorithm': self.algorithm,
         }
 
-    first_superuser_login: EmailStr
+    first_superuser_phone: PhoneNumber
     first_superuser_password: SecretStr
 
-    AI_LAYER_URL: str = "http://localhost:8001"
+    AI_LAYER_URL: str = 'http://localhost:8001'
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR.parent / 'infra' / '.env',
