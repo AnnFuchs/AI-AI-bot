@@ -43,7 +43,12 @@ async def get_current_user(
     if not sub:
         raise CREDENTIALS_EXCEPTIONS
 
-    user = await session.get(User, UUID(sub))
+    try:
+        user_id = UUID(sub)
+    except ValueError:
+        raise CREDENTIALS_EXCEPTIONS
+
+    user = await session.get(User, user_id)
     if not user:
         raise CREDENTIALS_EXCEPTIONS
     if not user.is_active:
@@ -53,15 +58,13 @@ async def get_current_user(
 
 
 async def get_current_superuser(
-    session: AsyncSession = Depends(get_async_session),
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    current_user: User = Depends(get_current_user),
 ) -> User:
-    """Get current cuperuser."""
-    user = await get_current_user(session=session, credentials=credentials)
-    if not user or not user.is_superuser:
+    """Get current superuser."""
+    if not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail='Access forbidden.',
         )
 
-    return user
+    return current_user
