@@ -1,28 +1,29 @@
-from typing import Annotated, Callable, Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
-from src.core.constants import CREDENTIALS_EXCEPTIONS, Role
+from src.core.constants import (
+    ACCOUNT_INACTIVE_EXCEPTIONS,
+    CREDENTIALS_EXCEPTIONS,
+    TOKEN_FORMAT,
+    TOKEN_TYPE,
+)
 from src.db.session import get_async_session
 from src.users.models import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='api/v1/auth/oauth/login')
-oauth2_scheme_optional = OAuth2PasswordBearer(
-    tokenUrl='api/v1/auth/oauth/login',
-    auto_error=False,
-)
+security = HTTPBearer(bearerFormat=TOKEN_FORMAT, scheme_name=TOKEN_TYPE)
 
 
 async def get_current_user(
     session: AsyncSession = Depends(get_async_session),
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> User:
-    """Получение текущего пользователя."""
+    """Get current user."""
+    token = credentials.credentials
     try:
         auth_data = settings.jwt_auth_data
         payload = jwt.decode(
@@ -33,7 +34,7 @@ async def get_current_user(
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Токен истек.',
+            detail='Token expired.',
         )
     except JWTError:
         raise CREDENTIALS_EXCEPTIONS
@@ -42,51 +43,25 @@ async def get_current_user(
     if not sub:
         raise CREDENTIALS_EXCEPTIONS
 
-    user_id = UUID(sub)
-    user = await session.get(User, user_id)
+    user = await session.get(User, UUID(sub))
     if not user:
         raise CREDENTIALS_EXCEPTIONS
+    if not user.is_active:
+        raise ACCOUNT_INACTIVE_EXCEPTIONS
 
     return user
 
 
-async def get_current_user_or_none(
+async def get_current_superuser(
     session: AsyncSession = Depends(get_async_session),
-    token: str = Depends(oauth2_scheme_optional),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> User:
-    """Получение текущего пользователя, если токен валидный, иначе None."""
-    if token is None:
-        return None
-
-    try:
-        auth_data = settings.jwt_auth_data
-        payload = jwt.decode(
-            token,
-            auth_data['secret_key'],
-            algorithms=[auth_data['algorithm']],
+    """Get current cuperuser."""
+    user = await get_current_user(session=session, credentials=credentials)
+    if not user or not user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Access forbidden.',
         )
-    except (ExpiredSignatureError, JWTError):
-        return None
 
-    sub = payload.get('sub')
-    if not sub:
-        return None
-
-    user_id = UUID(sub)
-    return await session.get(User, user_id)
-
-
-def get_user_by_role(required_roles: Sequence[Role]) -> Callable:
-    """Фабрика зависимости для проверки роли пользователя."""
-
-    async def role_checker(
-        current_user: Annotated[User, Depends(get_current_user)],
-    ) -> User:
-        if current_user.role not in required_roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='Недостаточно прав для выполнения операции',
-            )
-        return current_user
-
-    return role_checker
+    return user

@@ -69,7 +69,13 @@ PASSW_HASH_LEN = 256
 
 JWT_LIFE = 3600
 TOKEN_TYPE = 'Bearer'
+TOKEN_FORMAT = 'JWT'
 CREDENTIALS_EXCEPTIONS = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail='Wrong credentials.',
 )
+ACCOUNT_INACTIVE_EXCEPTIONS = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail='Account deactivated.',
+)
+DOC_ID_LEN = 8

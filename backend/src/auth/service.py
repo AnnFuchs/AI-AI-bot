@@ -1,10 +1,10 @@
 from pydantic import SecretStr
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.password import verify_password
 from src.core.logger import logger
 from src.users.models import User
+from src.users.service import user_service
 
 
 class AuthService:
@@ -17,9 +17,7 @@ class AuthService:
         session: AsyncSession,
     ) -> User | None:
         """Аутентификация пользователей."""
-        user = await session.scalar(
-                select(User).where(User.phone == login),
-            )
+        user = await user_service.get_by_login(login, session)
 
         if not user:
             logger.warning("Auth failed: user not found (login=%s)", login)

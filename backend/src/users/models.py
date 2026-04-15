@@ -5,6 +5,7 @@ from sqlalchemy import JSON, Boolean, Date, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.constants import (
+    DOC_ID_LEN,
     EMAIL_LEN,
     PASSW_HASH_LEN,
     PHONE_LEN,
@@ -33,6 +34,7 @@ class User(CommonMixin, Base):
         String(EMAIL_LEN),
         unique=True,
         index=True,
+        nullable=True,
     )
     hashed_password: Mapped[str] = mapped_column(
         String(PASSW_HASH_LEN),
@@ -40,10 +42,12 @@ class User(CommonMixin, Base):
     )
     date_of_birth: Mapped[date] = mapped_column(
         Date,
+        nullable=True,
     )
     sex: Mapped[Sex] = mapped_column(
         Enum(Sex, name='sex_enum'),
         default=Sex.UNKNOWN,
+        nullable=False,
     )
     role: Mapped[Role] = mapped_column(
         Enum(Role, name='role_enum'),
@@ -71,16 +75,18 @@ class User(CommonMixin, Base):
     )
     stroke_toast_subtype: Mapped[StrokeTOASTSubType] = mapped_column(
         Enum(StrokeTOASTSubType, name='subtype_toast_enum'),
+        nullable=True,
     )
     stroke_hemo_subtype: Mapped[StrokeHemSubType] = mapped_column(
         Enum(StrokeHemSubType, name='subtype_hem_enum'),
+        nullable=True,
     )
     medications: Mapped[list] = mapped_column(
         JSON,
-        nullable=False,
         default=list,
+        nullable=False,
     )
-    diary_entries: Mapped[list["DiaryEntry"]] = relationship(
+    diary_entries: Mapped[list['DiaryEntry']] = relationship(
         back_populates='user',
         cascade='all, delete-orphan',
         lazy='selectin',
@@ -89,6 +95,10 @@ class User(CommonMixin, Base):
         JSON,
         default=list,
         nullable=False,
+    )
+    doc_id: Mapped[str] = mapped_column(
+        String(DOC_ID_LEN),
+        nullable=True,
     )
 
 

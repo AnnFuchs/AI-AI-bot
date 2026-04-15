@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +12,17 @@ from src.users.validators import check_duplicate
 
 
 class UserService:
-    """CU from CRUD for User."""
+    """CRU from CRUD for User."""
+
+    async def get_by_login(
+        self,
+        login: str,
+        session: AsyncSession,
+    ) -> User | None:
+        """Get user by login credential."""
+        return await session.scalar(
+            select(User).where(User.phone == login), User.is_active,
+        )
 
     async def create(self, data: UserCreate, session: AsyncSession) -> User:
         """Create user."""
