@@ -1,6 +1,5 @@
 import re
 from datetime import date
-from uuid import UUID
 
 from pydantic import (
     BaseModel,
@@ -13,7 +12,6 @@ from pydantic import (
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from src.core.constants import (
-    AgeGroup,
     Role,
     Sex,
     StrokeHemSubType,
@@ -113,21 +111,6 @@ class UserUpdate(BaseModel):
                 'TOAST subtype cannot be set for hemorrhagic stroke.',
             )
         return self
-
-
-class UserContext(BaseModel):
-    """Context from user."""
-
-    user_id: UUID
-    role: Role = Role.PATIENT
-    stroke_date: date | None = None
-    stroke_type: StrokeType | None = None
-    stroke_toast_subtype: StrokeTOASTSubType | None = None
-    stroke_hemo_subtype: StrokeHemSubType | None = None
-    medications: list[Medication] | None = None
-    age_category: AgeGroup | None = None
-    known_symptoms: list[str] | None = None
-    doctor_id: UUID | None = None
 
 
 class AssignDoctorUpdate(BaseModel):

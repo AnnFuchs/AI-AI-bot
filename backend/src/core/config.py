@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     first_superuser_login: EmailStr
     first_superuser_password: SecretStr
 
+    AI_LAYER_URL: str = "http://localhost:8001"
+
     model_config = SettingsConfigDict(
         env_file=BASE_DIR.parent / 'infra' / '.env',
         env_file_encoding='utf-8',

@@ -21,6 +21,7 @@ from src.db.base import Base, CommonMixin
 
 if TYPE_CHECKING:
     from src.diary.models import DiaryEntry
+    from src.reminders.models import Reminder
 
 
 class User(CommonMixin, Base):
@@ -91,6 +92,11 @@ class User(CommonMixin, Base):
         nullable=False,
     )
     diary_entries: Mapped[list['DiaryEntry']] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan',
+        lazy='noload',
+    )
+    reminders: Mapped[list['Reminder']] = relationship(
         back_populates='user',
         cascade='all, delete-orphan',
         lazy='noload',
