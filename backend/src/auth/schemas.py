@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, SecretStr
 
 
 class AuthData(BaseModel):
-    """Схема аутентификации."""
+    """Auth scheme."""
 
     login: str
     password: SecretStr
@@ -11,9 +11,16 @@ class AuthData(BaseModel):
 
 
 class AuthToken(BaseModel):
-    """Схема получения токена."""
+    """Token scheme."""
 
     access_token: str
+    refresh_token: str
     token_type: str
+    model_config = ConfigDict(extra="forbid")
 
-    model_config = ConfigDict(extra='forbid')
+
+class RefreshTokenRequest(BaseModel):
+    """Refresh token scheme."""
+
+    refresh_token: str
+    model_config = ConfigDict(extra="forbid")

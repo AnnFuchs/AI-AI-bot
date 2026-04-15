@@ -65,11 +65,15 @@ class AgeGroup(StrEnum):
 PHONE_LEN = 16
 EMAIL_LEN = 254
 PASSW_HASH_LEN = 256
+DOC_ID_LEN = 8
 
 
 JWT_LIFE = 3600
+REFRESH_TOKEN_LIFE = 60 * 60 * 24 * 7
 TOKEN_TYPE = 'Bearer'
 TOKEN_FORMAT = 'JWT'
+JTI_LEN = 36
+
 CREDENTIALS_EXCEPTIONS = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail='Wrong credentials.',
@@ -78,4 +82,3 @@ ACCOUNT_INACTIVE_EXCEPTIONS = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
     detail='Account deactivated.',
 )
-DOC_ID_LEN = 8

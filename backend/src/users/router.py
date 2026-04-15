@@ -4,16 +4,12 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.dependencies import (
-    get_current_user,
-    get_current_user_or_none,
-    get_user_by_role,
-)
+from src.auth.dependencies import get_current_user
 from src.core.constants import Role
 from src.db.session import get_async_session
 from src.users.errors import DuplicateInfoError
 from src.users.models import User
-from src.users.schemas import UserCreate, UserUpdate, UserContext
+from src.users.schemas import UserContext, UserCreate, UserUpdate
 from src.users.service import user_service
 from src.users.validators import check_user_exists
 
@@ -23,7 +19,7 @@ SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 
 
 @router.post(
-    '',
+    '/register',
     status_code=status.HTTP_201_CREATED,
     summary='New user creation',
 )
@@ -39,6 +35,22 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
+
+
+@router.get(
+    '/me',
+    response_model=UserInfo,
+    summary='Получение информации о текущем пользователе',
+    responses=USER_GET_ME_RESPONSES,
+)
+async def get_your_user_info(
+    current_user: User = Depends(get_current_user),
+) -> UserInfo:
+    """Возвращает информацию о текущем пользователе.
+
+    Только для авторизированных пользователей
+    """
+    return current_user
 
 
 @router.patch(

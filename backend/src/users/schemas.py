@@ -53,14 +53,13 @@ class AdminUserCreate(UserCreate):
     is_superuser: bool = True
 
 
-class UserUpdate(BaseModel):
-    """Pydantic-schema for user info update."""
+class UserInfo(BaseModel):
+    """Pydantic-schema for user info show."""
 
-    phone: PhoneNumber | None = None
+    phone: PhoneNumber
     email: EmailStr | None = None
     date_of_birth: date | None = None
     sex: Sex | None = None
-    role: Role | None = None
     stroke_date: date | None = None
     recurrent_stroke: bool | None = None
     stroke_type: StrokeType | None = None
@@ -68,6 +67,13 @@ class UserUpdate(BaseModel):
     stroke_hemo_subtype: StrokeHemSubType | None = None
 
     model_config = ConfigDict(from_attributes=True, extra='forbid')
+
+
+class UserUpdate(UserInfo):
+    """Pydantic-schema for user info update."""
+
+    phone: PhoneNumber | None = None
+    role: Role | None = None
 
 
 class UserContext(BaseModel):
