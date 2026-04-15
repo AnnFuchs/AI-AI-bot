@@ -40,7 +40,7 @@ class User(CommonMixin, Base):
         String(PASSW_HASH_LEN),
         nullable=False,
     )
-    date_of_birth: Mapped[date] = mapped_column(
+    date_of_birth: Mapped[date | None] = mapped_column(
         Date,
         nullable=True,
     )
@@ -89,14 +89,14 @@ class User(CommonMixin, Base):
     diary_entries: Mapped[list['DiaryEntry']] = relationship(
         back_populates='user',
         cascade='all, delete-orphan',
-        lazy='selectin',
+        lazy='noload',
     )
     known_symptoms: Mapped[list[str]] = mapped_column(
         JSON,
         default=list,
         nullable=False,
     )
-    doc_id: Mapped[str] = mapped_column(
+    doctor_id: Mapped[str] = mapped_column(
         String(DOC_ID_LEN),
         nullable=True,
     )

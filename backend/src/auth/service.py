@@ -75,7 +75,11 @@ class AuthService:
     async def get_valid_refresh_token(
         self, jti: str, session: AsyncSession,
     ) -> RefreshToken | None:
-        """Get valid refresh token."""
+        """Get a non-revoked, non-expired refresh token record.
+
+        Note: does not validate the associated user's active state;
+        callers are responsible for that check.
+        """
         result = await session.execute(
             select(RefreshToken).where(
                 RefreshToken.token_jti == jti,
@@ -85,8 +89,25 @@ class AuthService:
         )
         return result.scalar_one_or_none()
 
+    async def revoke_all_user_tokens(
+        self, user_id: UUID | None, session: AsyncSession,
+    ) -> None:
+        """Revoke all active refresh tokens for a user (reuse detection?)."""
+        if user_id is None:
+            return
+        result = await session.execute(
+            select(RefreshToken).where(
+                RefreshToken.user_id == user_id,
+                RefreshToken.is_revoked.is_(False),
+            ),
+        )
+        tokens = result.scalars().all()
+        for token in tokens:
+            token.is_revoked = True
+        await session.commit()
+
     def extract_token_jti(self, token: str) -> str:
-        """Decode token and extract JTI claim."""
+        """Decode token, enforce expiry, and extract JTI claim."""
         try:
             payload = jwt.decode(
                 token,
@@ -113,7 +134,11 @@ class AuthService:
         return jti
 
     def extract_jti_safe(self, token: str) -> str | None:
-        """Safely decode token and return JTI, or None if invalid."""
+        """Safely decode token ignoring expiry and return JTI or None.
+
+        Used during logout where an expired refresh token should still
+        be revoked rather than silently ignored.
+        """
         try:
             payload = jwt.decode(
                 token,
@@ -123,6 +148,20 @@ class AuthService:
             )
             return payload.get('jti')
         except JWTError:
+            return None
+
+    def extract_user_id_safe(self, token: str) -> UUID | None:
+        """Safely decode token ignoring expiry and return user UUID or None."""
+        try:
+            payload = jwt.decode(
+                token,
+                settings.jwt_auth_data['secret_key'],
+                algorithms=[settings.jwt_auth_data['algorithm']],
+                options={"verify_exp": False},
+            )
+            sub = payload.get('sub')
+            return UUID(sub) if sub else None
+        except (JWTError, ValueError):
             return None
 
 

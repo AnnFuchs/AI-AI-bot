@@ -1,5 +1,5 @@
 import re
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
@@ -9,6 +9,7 @@ from pydantic import (
     EmailStr,
     SecretStr,
     field_validator,
+    model_validator,
 )
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
@@ -21,6 +22,16 @@ from src.core.constants import (
     StrokeTOASTSubType,
     StrokeType,
 )
+
+
+class Medication(BaseModel):
+    """Medication schema."""
+
+    name: str
+    dose_mg: int
+    frequency: str
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class UserCreate(BaseModel):
@@ -65,15 +76,45 @@ class UserInfo(BaseModel):
     stroke_type: StrokeType | None = None
     stroke_toast_subtype: StrokeTOASTSubType | None = None
     stroke_hemo_subtype: StrokeHemSubType | None = None
+    doctor_id: str | None = None
 
     model_config = ConfigDict(from_attributes=True, extra='forbid')
 
 
-class UserUpdate(UserInfo):
+class UserUpdate(BaseModel):
     """Pydantic-schema for user info update."""
 
     phone: PhoneNumber | None = None
+    email: EmailStr | None = None
+    date_of_birth: date | None = None
+    sex: Sex | None = None
+    stroke_date: date | None = None
+    recurrent_stroke: bool | None = None
+    stroke_type: StrokeType | None = None
+    stroke_toast_subtype: StrokeTOASTSubType | None = None
+    stroke_hemo_subtype: StrokeHemSubType | None = None
     role: Role | None = None
+
+    model_config = ConfigDict(from_attributes=True, extra='forbid')
+
+    @model_validator(mode='after')
+    def validate_stroke_subtypes(self) -> 'UserUpdate':
+        """Enforce mutual exclusivity of stroke subtypes."""
+        if (
+            self.stroke_type == StrokeType.ISCHEMIC
+            and self.stroke_hemo_subtype is not None
+        ):
+            raise ValueError(
+                'Hemorrhagic subtype cannot be set for ischemic stroke.',
+            )
+        if (
+            self.stroke_type == StrokeType.HEMORRHAGIC
+            and self.stroke_toast_subtype is not None
+        ):
+            raise ValueError(
+                'TOAST subtype cannot be set for hemorrhagic stroke.',
+            )
+        return self
 
 
 class UserContext(BaseModel):
@@ -85,9 +126,18 @@ class UserContext(BaseModel):
     stroke_type: StrokeType | None = None
     stroke_toast_subtype: StrokeTOASTSubType | None = None
     stroke_hemo_subtype: StrokeHemSubType | None = None
-    medications: list[tuple[str, int, str]] | None = None
+    medications: list[Medication] | None = None
     age_category: AgeGroup | None = None
     known_symptoms: list[str] | None = None
+    doctor_id: UUID | None = None
+
+
+class AssignDoctorUpdate(BaseModel):
+    """Schema for assigning or unassigning a doctor to a patient."""
+
+    doctor_id: str | None = None
+
+    model_config = ConfigDict(extra='forbid')
 
 
 class DiaryEntryCreate(BaseModel):
@@ -97,3 +147,14 @@ class DiaryEntryCreate(BaseModel):
     entry_json: dict[str, Any]
 
     model_config = ConfigDict(extra='forbid')
+
+
+class DiaryEntryInfo(BaseModel):
+    """Pydantic-schema for diary entry read."""
+
+    user_id: UUID
+    created_at: datetime
+    entry_type: EntryType
+    entry_json: dict[str, Any]
+
+    model_config = ConfigDict(from_attributes=True)

@@ -28,6 +28,11 @@ async def auth_user(user_data: AuthData, session: SessionDep) -> AuthToken:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Wrong login or password.',
         )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Account is inactive.',
+        )
 
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token_str, jti = create_refresh_token({"sub": str(user.id)})
@@ -58,7 +63,9 @@ async def refresh_token(
 
     db_token = await auth_service.get_valid_refresh_token(jti, session)
     if not db_token:
-        await auth_service.revoke_refresh_token(jti, session)
+        await auth_service.revoke_all_user_tokens(
+            auth_service.extract_user_id_safe(payload.refresh_token), session,
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Refresh token revoked or expired.',

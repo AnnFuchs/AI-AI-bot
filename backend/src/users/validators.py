@@ -11,7 +11,7 @@ from src.users.models import User
 async def check_user_exists(user_id: UUID, session: AsyncSession) -> User:
     """Return the user object if it already exists in the database.
 
-    Raises HttpException with HttpStatus.NOT_FOUND if not found.
+    Raises HTTP 404 if not found.
     """
     user = await session.get(User, user_id)
     if not user:
@@ -23,19 +23,18 @@ async def check_user_exists(user_id: UUID, session: AsyncSession) -> User:
 
 
 async def check_duplicate(
-    phone: str | None,
-    email: str | None,
     session: AsyncSession,
+    phone: str | None = None,
+    email: str | None = None,
     exclude_id: UUID | None = None,
 ) -> None:
-    """Check is there a user with those email or phone."""
+    """Check there is no existing user with the given email or phone.
+
+    Raises DuplicateInfoError if a conflict is found.
+    """
     checks = [
         (email, User.email, 'User with this email already exists.'),
-        (
-            phone,
-            User.phone,
-            'User with this phone number already exists.',
-        ),
+        (phone, User.phone, 'User with this phone number already exists.'),
     ]
 
     for value, column, message in checks:

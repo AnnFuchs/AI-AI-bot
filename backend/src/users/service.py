@@ -5,9 +5,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.password import get_password_hash
-from src.users.errors import DuplicateInfoError
+from src.users.errors import DuplicateInfoError, InactiveUserError
 from src.users.models import DiaryEntry, User
-from src.users.schemas import DiaryEntryCreate, UserCreate, UserUpdate
+from src.users.schemas import (
+    AssignDoctorUpdate,
+    DiaryEntryCreate,
+    UserCreate,
+    UserUpdate,
+)
 from src.users.validators import check_duplicate
 
 
@@ -19,14 +24,17 @@ class UserService:
         login: str,
         session: AsyncSession,
     ) -> User | None:
-        """Get user by login credential."""
+        """Get active user by phone number."""
         return await session.scalar(
-            select(User).where(User.phone == login), User.is_active,
+            select(User).where(
+                User.phone == login,
+                User.is_active == True,  # noqa: E712
+            ),
         )
 
     async def create(self, data: UserCreate, session: AsyncSession) -> User:
         """Create user."""
-        await check_duplicate(phone=data.phone, session=session)
+        await check_duplicate(session=session, phone=data.phone)
 
         user_dict = data.model_dump()
         user_dict['hashed_password'] = get_password_hash(
@@ -54,9 +62,9 @@ class UserService:
     ) -> User:
         """Update user data."""
         await check_duplicate(
+            session=session,
             email=update_data.email,
             phone=update_data.phone,
-            session=session,
             exclude_id=db_user.id,
         )
 
@@ -70,15 +78,28 @@ class UserService:
             await session.commit()
         except IntegrityError:
             await session.rollback()
-            raise ValueError('Passed data is incorrect.')
+            raise DuplicateInfoError('Passed data is incorrect.')
 
+        await session.refresh(db_user)
+        return db_user
+
+    async def assign_doctor(
+        self,
+        db_user: User,
+        data: AssignDoctorUpdate,
+        session: AsyncSession,
+    ) -> User:
+        """Assign or unassign a doctor to a patient."""
+        db_user.doctor_id = data.doctor_id
+        session.add(db_user)
+        await session.commit()
         await session.refresh(db_user)
         return db_user
 
     async def delete(self, db_user: User, session: AsyncSession) -> User:
         """Soft delete user by setting is_active to False."""
         if not db_user.is_active:
-            raise ValueError("User is already deactivated.")
+            raise InactiveUserError("User is already deactivated.")
 
         db_user.is_active = False
         session.add(db_user)
@@ -124,7 +145,7 @@ class DiaryEntryService:
         self, db_entry: DiaryEntry, session: AsyncSession,
     ) -> None:
         """Hard delete diary entry from the database."""
-        session.delete(db_entry)
+        await session.delete(db_entry)
         await session.commit()
 
 
