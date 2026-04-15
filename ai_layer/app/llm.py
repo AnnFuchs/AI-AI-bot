@@ -1,53 +1,96 @@
 import logging
-from typing import Dict, List, Any, AsyncGenerator, Optional
-from openai import AsyncOpenAI
-from tenacity import retry, stop_after_attempt, wait_exponential
+import base64
+import asyncio
+from typing import Dict, List, AsyncGenerator, Optional
+from gigachat import GigaChat
+from gigachat.models import Chat, Messages, MessagesRole
+from langchain_gigachat.embeddings import GigaChatEmbeddings
 
 from app.config import settings
 
 logger = logging.getLogger(__name__)
 
+
 class LLMHandler:
     def __init__(self):
-        self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_API_BASE)
+
+        self.client = GigaChat(
+            credentials=settings.GIGACHAT_CREDENTIALS,
+            verify_ssl_certs=False,
+        )
+        self.gigachat_embeddings = GigaChatEmbeddings(
+            credentials=settings.GIGACHAT_CREDENTIALS,
+            scope=settings.GIGACHAT_SCOPE,
+            model='EmbeddingsGigaR',
+            verify_ssl_certs=False,
+        )
 
     async def close(self):
-        if hasattr(self.client, "close"):
-            await self.client.close()
+        await self.client.aclose()
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-    async def chat_completion(self, messages: List[Dict[str, str]], response_format: Optional[Dict] = None) -> str:
-        kwargs = {
-            "model": settings.OPENAI_MODEL,
-            "messages": messages,
-            "timeout": 30
-        }
-        if response_format:
-            kwargs["response_format"] = response_format
+    async def chat_completion(
+        self,
+        messages: List[Dict[str, str]],
+        response_format: Optional[Dict] = None,
+    ) -> str:
+        payload = Chat(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                Messages(
+                    role=MessagesRole(m["role"]),
+                    content=m["content"],
+                )
+                for m in messages
+            ],
+        )
+        for attempt in range(3):
+            try:
+                resp = await self.client.achat(payload)
+                return resp.choices[0].message.content or ""
+            except Exception as e:
+                logger.warning(f"chat_completion attempt {attempt + 1} failed: {e}")
+                if attempt == 2:
+                    raise
+                import asyncio
+                await asyncio.sleep(2 ** attempt)
+        return ""
 
-        resp = await self.client.chat.completions.create(**kwargs)
-        return resp.choices[0].message.content or ""
-
-    async def chat_completion_stream(self, messages: List[Dict[str, str]]) -> AsyncGenerator[str, None]:
+    async def chat_completion_stream(
+        self, messages: List[Dict[str, str]]
+    ) -> AsyncGenerator[str, None]:
+        payload = Chat(
+            model=settings.OPENAI_MODEL,
+            messages=[
+                Messages(
+                    role=MessagesRole(m["role"]),
+                    content=m["content"],
+                )
+                for m in messages
+            ],
+            stream=True,
+        )
         try:
-            logger.info(f'Sending to model {settings.OPENAI_MODEL} with messages: {messages}')
-            resp = await self.client.chat.completions.create(
-                model=settings.OPENAI_MODEL,
-                messages=messages,
-                stream=True,
-                timeout=30
-            )
-            async for chunk in resp:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+            async for chunk in self.client.astream(payload):
+                content = chunk.choices[0].delta.content
+                if content:
+                    yield content
         except Exception as e:
             logger.error(f"Streaming Chat Error: {e}")
             yield "Произошла ошибка при генерации ответа."
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def get_embedding(self, text: str) -> List[float]:
-        response = await self.client.embeddings.create(
-            input=text,
-            model=settings.OPENAI_EMBEDDING_MODEL
-        )
-        return response.data[0].embedding
+        loop = asyncio.get_event_loop()
+
+        for attempt in range(3):
+            try:
+                embeddings = await loop.run_in_executor(
+                    None, self.gigachat_embeddings.embed_documents, [text]
+                )
+                return embeddings[0]
+            except Exception as e:
+                logger.warning(f"get_embedding attempt {attempt + 1} failed: {e}")
+                if attempt == 2:
+                    raise
+                await asyncio.sleep(2 ** attempt)
+
+        return []

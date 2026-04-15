@@ -1,34 +1,119 @@
-from typing import List
-from app.schemas import SymptomsData, RedFlag, SymptomEntity
+from typing import List, Optional
+from app.schemas import SymptomsData, RedFlag
 
-RED_FLAG_RULES = [
-    # (name, predicate, level)
-    ("FAST_symptoms", lambda s: _check_symptom(s, 'face_drooping') or _check_symptom(s, 'arm_weakness') or _check_symptom(s, 'speech_disorder'), "emergency"),
-    ("vision_loss", lambda s: _check_symptom(s, 'vision_loss'), "emergency"),
-    ("loss_of_consciousness", lambda s: _check_symptom(s, 'loss_of_consciousness'), "emergency"),
-    ("severe_headache", lambda s: _check_symptom(s, 'headache') and _get_intensity(s, 'headache') >= 8, "emergency"),
-    ("high_bp_critical", lambda s: _check_symptom(s, 'blood_pressure_high') and _get_value(s, 'blood_pressure_high') >= 180, "urgent"),
-    ("general_poor", lambda s: s.general_wellbeing == 'poor', "warning"),
-]
+# Symptoms that trigger emergency if is_new OR is_worsening
+STROKE_SYMPTOMS = {
+    "arm_or_leg_weakness",
+    "face_asymmetry",
+    "balance_loss",
+    "numbness",
+    "vision_changes",
+    "dysphagia",
+    "confusion",
+    "disorientation",
+    "speech_change",
+}
 
-def _check_symptom(s: SymptomsData, name: str) -> bool:
-    sym = s.symptoms.get(name, SymptomEntity())
-    return sym.present
+STROKE_SYMPTOM_DESCRIPTIONS = {
+    "arm_or_leg_weakness": "Слабость в руке или ноге",
+    "face_asymmetry": "Асимметрия лица",
+    "balance_loss": "Нарушение равновесия",
+    "numbness": "Онемение",
+    "vision_changes": "Нарушение зрения",
+    "dysphagia": "Нарушение глотания",
+    "confusion": "Спутанность сознания",
+    "disorientation": "Дезориентация",
+    "speech_change": "Нарушение речи",
+}
 
-def _get_intensity(s: SymptomsData, name: str) -> float:
-    sym = s.symptoms.get(name, SymptomEntity())
-    return sym.intensity or 0
 
-def _get_value(s: SymptomsData, name: str) -> float:
-    sym = s.symptoms.get(name, SymptomEntity())
-    return sym.value or 0
+def _get_bp_thresholds(symptoms: SymptomsData):
+    """Return (systolic_target, diastolic_target) based on patient context."""
+    age_category = symptoms.age_category or "middle"
+    has_stenosis = symptoms.has_stenosis or False
 
-def evaluate_red_flags(symptoms: SymptomsData) -> List[RedFlag]:
-    flags = []
-    for name, predicate, level in RED_FLAG_RULES:
-        try:
-            if predicate(symptoms):
-                flags.append(RedFlag(name=name, level=level, description=f"Выявлен тревожный симптом: {name}"))
-        except Exception:
+    if has_stenosis:
+        return 150, 90
+    if age_category in ("old_independent", "old_dependent"):
+        return 140, 90
+    return 130, 80
+
+
+def evaluate_red_flags(symptoms: Optional[SymptomsData]) -> List[RedFlag]:
+    if not symptoms:
+        return []
+
+    flags: List[RedFlag] = []
+
+    # --- Stroke symptoms: emergency if new or worsening ---
+    for sym_key in STROKE_SYMPTOMS:
+        entity = symptoms.symptoms.get(sym_key)
+        if not entity or not entity.present:
             continue
+        if entity.is_new or entity.is_worsening:
+            flags.append(RedFlag(
+                name=sym_key,
+                level="emergency",
+                description=STROKE_SYMPTOM_DESCRIPTIONS[sym_key],
+                target_info="Возможный инсульт — немедленно вызовите скорую"
+            ))
+
+    # --- Headache: emergency if new + high intensity OR sudden worsening ---
+    headache = symptoms.symptoms.get("headache")
+    if headache and headache.present:
+        is_thunderclap = headache.is_new and (headache.intensity or 0) >= 8
+        if is_thunderclap or headache.is_worsening:
+            flags.append(RedFlag(
+                name="headache",
+                level="emergency",
+                description="Внезапная сильная головная боль",
+                target_info="Возможное субарахноидальное кровоизлияние"
+            ))
+
+    # --- Suicidality: emergency ---
+    depression = symptoms.symptoms.get("depression")
+    suicidality = symptoms.symptoms.get("suicidality")
+    if (depression and depression.present and depression.has_suicidality) or \
+            (suicidality and suicidality.present):
+        flags.append(RedFlag(
+            name="suicidality",
+            level="emergency",
+            description="Мысли о самоповреждении или суициде",
+            target_info="Кризисная линия: 8-800-2000-122"
+        ))
+
+    # --- Blood pressure: emergency if above red flag thresholds ---
+    bp = symptoms.blood_pressure
+    if bp:
+        sys_red = 180
+        dia_red = 120
+        sys_target, dia_target = _get_bp_thresholds(symptoms)
+
+        if (bp.systolic and bp.systolic >= sys_red) or \
+                (bp.diastolic and bp.diastolic >= dia_red):
+            flags.append(RedFlag(
+                name="hypertensive_crisis",
+                level="emergency",
+                description=f"Гипертонический криз: {bp.systolic}/{bp.diastolic} мм рт.ст.",
+                target_info="Немедленно вызовите скорую"
+            ))
+        elif (bp.systolic and bp.systolic > sys_target) or \
+                (bp.diastolic and bp.diastolic > dia_target):
+            flags.append(RedFlag(
+                name="elevated_bp",
+                level="urgent",
+                description=f"Давление выше целевого: {bp.systolic}/{bp.diastolic} мм рт.ст.",
+                target_info=f"Целевое: {sys_target}/{dia_target} мм рт.ст."
+            ))
+
+    # --- Weight loss: warning ---
+    weight_loss = symptoms.symptoms.get("weight_loss")
+    if weight_loss and weight_loss.present:
+        flags.append(RedFlag(
+            name="weight_loss",
+            level="warning",
+            description="Снижение веса",
+            target_info="Обсудите с врачом на ближайшем приёме"
+        ))
+
     return flags

@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from qdrant_client import AsyncQdrantClient
@@ -61,7 +61,6 @@ async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, No
         "user_message": request.message,
         "user_context": request.user_context
     }
-
     config = {
         "configurable": {"thread_id": request.session_id}
     }
@@ -72,6 +71,8 @@ async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, No
 
             if event_type == "token":
                 yield f"data: {json.dumps({'type': 'token', 'content': event.get('content', '')}, ensure_ascii=False)}\n\n"
+            elif event_type == "text":
+                yield f"data: {json.dumps({'type': 'text', 'content': event.get('content', '')}, ensure_ascii=False)}\n\n"
             elif event_type == "commands":
                 yield f"data: {json.dumps({'type': 'commands', 'payload': event.get('payload')}, ensure_ascii=False)}\n\n"
             elif event_type == "alert":
@@ -82,6 +83,7 @@ async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, No
                 yield f"data: {json.dumps({'type': 'error', 'message': event.get('message')}, ensure_ascii=False)}\n\n"
 
         yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
+
     except Exception as e:
         logger.error(f"Stream error: {e}")
         yield f"data: {json.dumps({'type': 'error', 'message': 'Internal Server Error'}, ensure_ascii=False)}\n\n"
@@ -91,10 +93,7 @@ async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, No
 @app.post("/chat/stream")
 async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(
-        event_generator(
-            request,
-            graph=app.state.graph
-        ),
+        event_generator(request, graph=app.state.graph),
         media_type="text/event-stream; charset=utf-8"
     )
 
