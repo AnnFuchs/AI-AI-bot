@@ -1,7 +1,7 @@
 import json
-import logging
+from typing import AsyncGenerator
 
-pip install httpx
+import httpx
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,11 +11,11 @@ from src.chat.commands import handle_backend_commands
 from src.chat.context import build_user_context
 from src.chat.schemas import ChatRequest
 from src.core.config import settings
+from src.core.logger import logger
 from src.db.session import get_async_session
 from src.users.models import User
 
 router = APIRouter(prefix='/chat', tags=['Chat'])
-logger = logging.getLogger(__name__)
 
 
 @router.post('/stream')
@@ -28,22 +28,22 @@ async def chat_stream(
     user_context = await build_user_context(user, db)
 
     ai_payload = {
-        "user_id": str(user.id),
-        "session_id": str(request.session_id),
-        "message": request.message,
-        "user_context": user_context.model_dump(mode="json"),
+        'user_id': str(user.id),
+        'session_id': str(request.session_id),
+        'message': request.message,
+        'user_context': user_context.model_dump(mode="json"),
     }
 
-    async def event_stream():
+    async def event_stream() -> AsyncGenerator:
         try:
             async with httpx.AsyncClient(timeout=60) as client:
                 async with client.stream(
-                    "POST",
-                    f"{settings.AI_LAYER_URL}/chat/stream",
+                    'POST',
+                    f'{settings.AI_LAYER_URL}/chat/stream',
                     json=ai_payload,
                 ) as response:
                     async for line in response.aiter_lines():
-                        if not line.startswith("data:"):
+                        if not line.startswith('data:'):
                             continue
 
                         raw = line[5:].strip()
@@ -53,22 +53,28 @@ async def chat_stream(
                         try:
                             event = json.loads(raw)
                         except json.JSONDecodeError:
-                            logger.warning("Bad SSE line: %s", raw)
+                            logger.warning('Bad SSE line: %s', raw)
                             continue
 
-                        event_type = event.get("type")
+                        event_type = event.get('type')
 
-                        if event_type == "commands":
+                        if event_type == 'commands':
                             await handle_backend_commands(
-                                event.get("payload", []), user, db
+                                event.get('payload', []), user, db,
                             )
                             continue
 
-                        # token | alert | buttons | anything else → forward to client
-                        yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+                        yield (
+                            f'data: {json.dumps(event, ensure_ascii=False)}\n'
+                        )
 
         except httpx.RequestError:
-            logger.exception("AI layer unreachable")
-            yield f"data: {json.dumps({'type': 'error', 'message': 'AI service unavailable'})}\n\n"
+            logger.exception('AI layer unreachable')
+            yield (
+                f"data: {
+                    json.dumps(
+                        {'type': 'error', 'message': 'AI service unavailable'})
+                    }\n\n"
+            )
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
