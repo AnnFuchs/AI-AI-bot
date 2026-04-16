@@ -5,14 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/frontend/.env.local.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/client.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/entities/chat/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/entities/chat/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/hooks/use-chat-stream.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/hooks/use-chat-stream.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/lib/parse-sse.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/lib/parse-sse.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-input.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-input.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/ui/message-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/ui/message-list.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

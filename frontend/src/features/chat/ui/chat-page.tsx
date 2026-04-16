@@ -9,8 +9,8 @@ export function ChatPage() {
   const isStreaming = status === "streaming";
 
   return (
-    <main className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-4xl flex-col gap-5 px-5 pt-5">
-      <section aria-live="polite" className="flex-1 pb-28">
+    <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 pt-5">
+      <section aria-live="polite" className="flex-1">
         <MessageList isStreaming={isStreaming} messages={messages} />
       </section>
 

@@ -56,7 +56,7 @@ export function ChatInput({ disabled = false, onSubmit }: ChatInputProps) {
     >
       <div className="flex flex-row items-end gap-2">
         <textarea
-          aria-label="Сообщение Ай-Яй"
+          aria-label="Поле ввода сообщения"
           className="h-12 max-h-40 w-full resize-none overflow-hidden rounded-xl border-2 border-black/20 bg-white px-4 py-2.5 text-lg leading-6 tracking-normal text-foreground placeholder:text-black/60 transition-[border-color,box-shadow] focus:border-primary/80 focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.18)]
  focus:outline-none disabled:cursor-not-allowed disabled:border-black/20 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 disabled:placeholder:text-muted-foreground"
           disabled={disabled}
