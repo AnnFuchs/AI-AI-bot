@@ -12,6 +12,7 @@ from src.reminders.models import PushSubscription
 from src.reminders.scheduler_service import (
     delete_push_subscription_by_id,
     get_active_reminders_due_now,
+    get_opted_in_users_with_subscriptions,
 )
 
 scheduler = AsyncIOScheduler(timezone='UTC')
@@ -67,10 +68,32 @@ async def check_reminders() -> None:
             await _send_push(subscription, title, body)
 
 
+async def send_daily_checkins() -> None:
+    """Send daily 'how is your day' push to all opted-in users."""
+    users = await get_opted_in_users_with_subscriptions()
+
+    for user in users:
+        if not user.push_subscriptions:
+            continue
+        for subscription in user.push_subscriptions:
+            await _send_push(
+                subscription,
+                title='How are you today?',
+                body='Tap to log how you are feeling right now.',
+            )
+
+
 def start_scheduler() -> None:
     """Start scheduler."""
     scheduler.add_job(
         check_reminders, 'interval', minutes=1, id='check_reminders',
+    )
+    scheduler.add_job(
+        send_daily_checkins,
+        'cron',
+        hour=10,
+        minute=0,
+        id='daily_checkins',
     )
     scheduler.start()
 

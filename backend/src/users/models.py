@@ -115,6 +115,11 @@ class User(CommonMixin, Base):
         cascade='all, delete-orphan',
         lazy='noload',
     )
+    daily_checkin_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
     timezone: Mapped[str] = mapped_column(
         String(50), default='UTC', nullable=False,
     )

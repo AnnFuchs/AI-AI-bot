@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 from src.core.constants import DAY_NAMES
 from src.db.session import AsyncSessionLocal
 from src.reminders.models import PushSubscription, Reminder
+from src.users.models import User
 
 
 async def get_active_reminders_due_now() -> list[Reminder]:
@@ -22,9 +23,7 @@ async def get_active_reminders_due_now() -> list[Reminder]:
             .where(Reminder.is_active)
             .options(
                 selectinload(Reminder.user).selectinload(
-                    __import__(
-                        'src.users.models', fromlist=['User'],
-                    ).User.push_subscriptions,
+                    User.push_subscriptions,
                 ),
             ),
         )
@@ -59,3 +58,14 @@ async def delete_push_subscription_by_id(subscription_id: UUID) -> None:
         if obj:
             await db.delete(obj)
             await db.commit()
+
+
+async def get_opted_in_users_with_subscriptions() -> list:
+    """Return all active users with daily check-in enabled and push subs."""
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(User)
+            .where(User.is_active, User.daily_checkin_enabled)
+            .options(selectinload(User.push_subscriptions)),
+        )
+        return result.scalars().all()

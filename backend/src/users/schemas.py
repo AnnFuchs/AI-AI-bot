@@ -1,6 +1,7 @@
 import re
 from datetime import date
 
+import pytz
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -72,7 +73,10 @@ class UserInfo(BaseModel):
     stroke_type: StrokeType | None = None
     stroke_toast_subtype: StrokeTOASTSubType | None = None
     stroke_hemo_subtype: StrokeHemSubType | None = None
+    medications: list[Medication] | None = None
     doctor_id: str | None = None
+    daily_checkin_enabled: bool = True
+    timezone: str | None = None
 
     model_config = ConfigDict(from_attributes=True, extra='forbid')
 
@@ -90,6 +94,8 @@ class UserUpdate(BaseModel):
     stroke_toast_subtype: StrokeTOASTSubType | None = None
     stroke_hemo_subtype: StrokeHemSubType | None = None
     role: Role | None = None
+    daily_checkin_enabled: bool | None = None
+    timezone: str | None = None
 
     model_config = ConfigDict(from_attributes=True, extra='forbid')
 
@@ -119,3 +125,21 @@ class AssignDoctorUpdate(BaseModel):
     doctor_id: str | None = None
 
     model_config = ConfigDict(extra='forbid')
+
+
+class TimezoneUpdate(BaseModel):
+    """Schema for timezone sync."""
+
+    timezone: str
+
+    model_config = ConfigDict(extra='forbid')
+
+    @field_validator('timezone')
+    @classmethod
+    def validate_timezone(cls, v: str) -> str:
+        """Validate tz."""
+        try:
+            pytz.timezone(v)
+        except pytz.exceptions.UnknownTimeZoneError:
+            raise ValueError(f'Unknown timezone: {v}')
+        return v

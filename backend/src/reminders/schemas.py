@@ -13,6 +13,7 @@ class ReminderOut(BaseModel):
     med_name: str | None
     time: dt_time | None
     days: list
+    is_active: bool
     created_at: datetime
 
     model_config = {'from_attributes': True}

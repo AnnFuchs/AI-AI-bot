@@ -36,6 +36,8 @@ async def deactivate_reminder(
     reminder = result.scalar_one_or_none()
     if not reminder:
         return None
+    if not reminder.is_active:
+        return None
     reminder.is_active = False
     await db.commit()
     return reminder
