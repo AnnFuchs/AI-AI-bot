@@ -21,7 +21,7 @@ from src.reminders.schemas import (
 )
 from src.users.models import User
 
-router = APIRouter(prefix='/reminders', tags=['reminders'])
+router = APIRouter(prefix='/reminders', tags=['Reminders'])
 
 
 @router.get('/', response_model=list[ReminderOut])
