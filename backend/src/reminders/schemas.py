@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import time as dt_time
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -10,7 +11,7 @@ class ReminderOut(BaseModel):
     id: UUID
     reminder_type: str
     med_name: str | None
-    time: str | None
+    time: dt_time | None
     days: list
     created_at: datetime
 
