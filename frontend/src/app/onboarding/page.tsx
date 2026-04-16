@@ -4,7 +4,7 @@ import { Button } from "@/shared/ui/button";
 
 export default function OnboardingPage() {
   return (
-    <main className="flex flex-col gap-5 min-h-dvh max-w-4xl p-8">
+    <main className="flex flex-col gap-5 min-h-dvh max-w-4xl px-5 py-8 sm:p-8">
         <p className="text-lg leading-6">
           Здравствуйте! Меня зовут Ай-Яй.
           <br />Я ваш помощник в жизни после инсульта.
@@ -19,7 +19,7 @@ export default function OnboardingPage() {
         </p>
 
       <Button asChild className="w-fit">
-        <Link href="/settings">
+        <Link href="/onboarding/questions">
           Ответить на вопросы
           <ArrowRightIcon aria-hidden="true" />
         </Link>

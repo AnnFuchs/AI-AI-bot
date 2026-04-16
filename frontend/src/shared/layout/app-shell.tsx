@@ -20,7 +20,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
     const isAuthPage =
         pathname === "/login" ||
         pathname === "/register" ||
-        pathname === "/onboarding";
+        pathname.startsWith("/onboarding");
 
     return (
         <div className="min-h-dvh bg-background text-foreground">
