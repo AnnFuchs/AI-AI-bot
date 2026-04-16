@@ -36,7 +36,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
                                 return (
                                     <li className="flex-1" key={item.href}>
                                         <Button asChild variant="ghost" className={cn(
-                                            "h-16 w-full",
+                                            "h-16 w-full [&_svg]:size-8",
                                             isActive && "bg-muted text-foreground",
                                         )}>
                                             <Link

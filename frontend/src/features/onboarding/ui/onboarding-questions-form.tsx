@@ -24,11 +24,15 @@ type DateFieldProps = {
 
 export function OnboardingQuestionsForm() {
   const router = useRouter();
+  const [strokeOwner, setStrokeOwner] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [sex, setSex] = useState("");
   const [strokeDate, setStrokeDate] = useState("");
   const [strokeTypes, setStrokeTypes] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   function toggleStrokeType(value: string, checked: boolean) {
+    setError(null);
     setStrokeTypes((current) => {
       if (checked) {
         return [...current, value];
@@ -43,13 +47,28 @@ export function OnboardingQuestionsForm() {
       <form
         className="flex flex-1 flex-col gap-8"
         id="onboarding-questions-form"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault();
+
+          if (!strokeOwner || !birthDate || !sex || !strokeDate || strokeTypes.length === 0) {
+            setError("Заполните, пожалуйста, все поля.");
+            return;
+          }
+
           router.push("/");
         }}
       >
         <fieldset>
-          <RadioGroup defaultValue="self" name="stroke-owner" className="flex flex-col gap-3">
+          <RadioGroup
+            className="flex flex-col gap-3"
+            name="stroke-owner"
+            onValueChange={(value) => {
+              setStrokeOwner(value);
+              setError(null);
+            }}
+            value={strokeOwner}
+          >
             <label className="flex items-center gap-3 text-xl leading-6">
               <RadioGroupItem value="self" />
               У меня был инсульт
@@ -64,13 +83,24 @@ export function OnboardingQuestionsForm() {
         <DateField
           id="birth-date"
           label="Дата рождения"
-          onChange={setBirthDate}
+          onChange={(value) => {
+            setBirthDate(value);
+            setError(null);
+          }}
           value={birthDate}
         />
 
         <fieldset>
           <legend className="mb-3 text-xl leading-6">Пол</legend>
-          <RadioGroup defaultValue="male" name="sex" className="flex flex-wrap gap-4">
+          <RadioGroup
+            className="flex flex-wrap gap-4"
+            name="sex"
+            onValueChange={(value) => {
+              setSex(value);
+              setError(null);
+            }}
+            value={sex}
+          >
             <label className="flex items-center gap-3 text-xl leading-6">
               <RadioGroupItem value="male" />
               Муж
@@ -86,7 +116,10 @@ export function OnboardingQuestionsForm() {
           hint="Если точная дата неизвестна, укажите примерную"
           id="stroke-date"
           label="Дата инсульта"
-          onChange={setStrokeDate}
+          onChange={(value) => {
+            setStrokeDate(value);
+            setError(null);
+          }}
           value={strokeDate}
         />
 
@@ -109,6 +142,12 @@ export function OnboardingQuestionsForm() {
             ))}
           </div>
         </fieldset>
+
+        {error ? (
+          <p className="text-lg leading-6 text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
       </form>
 
       <Button className="mt-8" form="onboarding-questions-form" type="submit">
