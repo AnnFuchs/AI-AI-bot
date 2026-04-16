@@ -8,9 +8,8 @@ export type ChatMessage = {
 };
 
 export type ChatRequest = {
+  session_id: string;
   message: string;
-  conversationId?: string;
-  profileId?: string;
 };
 
 export type SSEEvent =

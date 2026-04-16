@@ -1,4 +1,4 @@
-import { API_BASE_URL, USE_MOCK_API } from "./config";
+import { API_BASE_URL, API_INCLUDE_CREDENTIALS, USE_MOCK_API } from "./config";
 import { ApiError } from "./errors";
 import { mockAdapter } from "./mock-adapter";
 
@@ -38,6 +38,7 @@ export const apiClient = {
 
     const response = await fetch(createUrl(path), {
       method: options.method ?? "GET",
+      credentials: API_INCLUDE_CREDENTIALS ? "include" : "same-origin",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
@@ -61,6 +62,7 @@ export const apiClient = {
 
     const response = await fetch(createUrl(path), {
       method: options.method ?? "POST",
+      credentials: API_INCLUDE_CREDENTIALS ? "include" : "same-origin",
       headers: {
         Accept: "text/event-stream",
         "Content-Type": "application/json",

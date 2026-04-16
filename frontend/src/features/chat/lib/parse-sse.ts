@@ -1,5 +1,7 @@
 import type { SSEEvent } from "@/entities";
 
+type ParsedPayload = Record<string, unknown>;
+
 function parseData(data: string) {
   if (!data) {
     return {};
@@ -10,6 +12,22 @@ function parseData(data: string) {
   } catch {
     return data;
   }
+}
+
+function isObject(payload: unknown): payload is ParsedPayload {
+  return Boolean(payload) && typeof payload === "object" && !Array.isArray(payload);
+}
+
+function readString(payload: ParsedPayload, keys: string[]) {
+  for (const key of keys) {
+    const value = payload[key];
+
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+
+  return undefined;
 }
 
 export function parseSSEFrame(frame: string): SSEEvent | null {
@@ -29,52 +47,53 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
   }
 
   const payload = parseData(dataLines.join("\n"));
+  const payloadObject = isObject(payload) ? payload : null;
+  const eventType =
+    eventName === "message" && payloadObject && typeof payloadObject.type === "string"
+      ? payloadObject.type
+      : eventName;
 
-  if (eventName === "token") {
+  if (eventType === "token") {
     if (typeof payload === "string") {
       return { type: "token", token: payload };
     }
 
-    if (
-      payload &&
-      typeof payload === "object" &&
-      "token" in payload &&
-      typeof payload.token === "string"
-    ) {
-      return { type: "token", token: payload.token };
+    if (payloadObject) {
+      return {
+        type: "token",
+        token: readString(payloadObject, ["token", "content", "delta", "text"]) ?? "",
+      };
     }
 
     return { type: "token", token: "" };
   }
 
-  if (eventName === "done") {
-    if (
-      payload &&
-      typeof payload === "object" &&
-      "conversationId" in payload &&
-      typeof payload.conversationId === "string"
-    ) {
-      return { type: "done", conversationId: payload.conversationId };
+  if (eventType === "done") {
+    if (payloadObject) {
+      return {
+        type: "done",
+        conversationId: readString(payloadObject, ["conversationId", "conversation_id"]),
+      };
     }
 
     return { type: "done" };
   }
 
-  if (eventName === "error") {
-    if (
-      payload &&
-      typeof payload === "object" &&
-      "message" in payload &&
-      typeof payload.message === "string"
-    ) {
-      return { type: "error", message: payload.message };
+  if (eventType === "error") {
+    if (payloadObject) {
+      return {
+        type: "error",
+        message:
+          readString(payloadObject, ["message", "detail"]) ??
+          "Поток чата завершился с ошибкой.",
+      };
     }
 
     return { type: "error", message: "Поток чата завершился с ошибкой." };
   }
 
-  if (eventName === "metadata" && payload && typeof payload === "object") {
-    return { type: "metadata", data: payload as Record<string, unknown> };
+  if (eventType === "metadata" && payloadObject) {
+    return { type: "metadata", data: payloadObject };
   }
 
   return null;

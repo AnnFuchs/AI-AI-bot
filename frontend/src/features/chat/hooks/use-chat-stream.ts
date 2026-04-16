@@ -23,6 +23,7 @@ function createMessage(role: ChatMessage["role"], content: string): ChatMessage 
 }
 
 export function useChatStream() {
+  const sessionIdRef = useRef(createId());
   const [messages, setMessages] = useState<ChatMessage[]>([
     createMessage("assistant", "welcome"),
   ]);
@@ -70,7 +71,7 @@ export function useChatStream() {
 
       try {
         const stream = await streamChat(
-          { message: trimmedMessage },
+          { message: trimmedMessage, session_id: sessionIdRef.current },
           abortController.signal,
         );
         const reader = stream.getReader();
