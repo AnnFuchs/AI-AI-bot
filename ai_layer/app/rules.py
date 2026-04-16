@@ -1,7 +1,6 @@
 from typing import List, Optional
 from app.schemas import SymptomsData, RedFlag
 
-# Symptoms that trigger emergency if is_new OR is_worsening
 STROKE_SYMPTOMS = {
     "arm_or_leg_weakness",
     "face_asymmetry",
@@ -28,42 +27,63 @@ STROKE_SYMPTOM_DESCRIPTIONS = {
 
 
 def _get_bp_thresholds(symptoms: SymptomsData):
-    """Return (systolic_target, diastolic_target) based on age category from backend.
-
-    Backend sends age_category as AgeGroup enum values:
-      "18-44"  → young
-      "45-65"  → middle
-      "65+"    → old
-    """
     age_category = symptoms.age_category or "45-65"
-
     if age_category == "65+":
         return 140, 90
-
-    # "18-44" and "45-65" → standard target
     return 130, 80
 
 
-def evaluate_red_flags(symptoms: Optional[SymptomsData]) -> List[RedFlag]:
+def evaluate_red_flags(
+    symptoms: Optional[SymptomsData],
+    known_symptoms: Optional[List[str]] = None,
+    stroke_date: Optional[str] = None,
+    fast_checked: bool = False,
+) -> List[RedFlag]:
     if not symptoms:
         return []
 
     flags: List[RedFlag] = []
+    known = set(known_symptoms or [])
 
-    # --- Stroke symptoms: emergency if new or worsening ---
+    # --- Stroke symptoms ---
+    present_stroke_count = sum(
+        1 for k, e in symptoms.symptoms.items()
+        if k in STROKE_SYMPTOMS and e.present
+    )
+
     for sym_key in STROKE_SYMPTOMS:
         entity = symptoms.symptoms.get(sym_key)
         if not entity or not entity.present:
             continue
-        if entity.is_new or entity.is_worsening:
+
+        is_known_chronic = sym_key in known and stroke_date
+
+        is_significant = (
+            entity.is_new is True
+            or entity.is_worsening is True
+            # после clarification: emergency только если ≥2 инсультных симптомов
+            # (изолированное онемение без подтверждения FAST — не emergency)
+            or (fast_checked and entity.is_new is not False and present_stroke_count >= 2)
+        )
+
+        if not is_significant:
+            continue
+
+        if is_known_chronic:
+            flags.append(RedFlag(
+                name=sym_key,
+                level="warning",
+                description=STROKE_SYMPTOM_DESCRIPTIONS[sym_key],
+                target_info="Хронический постинсультный симптом — сообщите врачу при ухудшении"
+            ))
+        else:
             flags.append(RedFlag(
                 name=sym_key,
                 level="emergency",
                 description=STROKE_SYMPTOM_DESCRIPTIONS[sym_key],
                 target_info="Возможный инсульт — немедленно вызовите скорую"
             ))
-
-    # --- Headache: emergency if new + high intensity OR sudden worsening ---
+    # --- Headache ---
     headache = symptoms.symptoms.get("headache")
     if headache and headache.present:
         is_thunderclap = headache.is_new and (headache.intensity or 0) >= 8
@@ -75,7 +95,7 @@ def evaluate_red_flags(symptoms: Optional[SymptomsData]) -> List[RedFlag]:
                 target_info="Возможное субарахноидальное кровоизлияние"
             ))
 
-    # --- Suicidality: emergency ---
+    # --- Suicidality ---
     depression = symptoms.symptoms.get("depression")
     suicidality = symptoms.symptoms.get("suicidality")
     if (depression and depression.present and depression.has_suicidality) or \
@@ -87,7 +107,7 @@ def evaluate_red_flags(symptoms: Optional[SymptomsData]) -> List[RedFlag]:
             target_info="Кризисная линия: 8-800-2000-122"
         ))
 
-    # --- Blood pressure: emergency if above red flag thresholds ---
+    # --- Blood pressure ---
     bp = symptoms.blood_pressure
     if bp:
         sys_red = 180
@@ -111,7 +131,7 @@ def evaluate_red_flags(symptoms: Optional[SymptomsData]) -> List[RedFlag]:
                 target_info=f"Целевое: {sys_target}/{dia_target} мм рт.ст."
             ))
 
-    # --- Weight loss: warning ---
+    # --- Weight loss ---
     weight_loss = symptoms.symptoms.get("weight_loss")
     if weight_loss and weight_loss.present:
         flags.append(RedFlag(

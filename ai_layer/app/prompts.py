@@ -60,71 +60,48 @@ Respond ONLY with valid JSON:
 {"intent": "intent_name", "confidence": 0.0}
 """
 
-SYMPTOM_EXTRACT_PROMPT = """
-You are extracting symptoms from a stroke patient's message.
+WELLBEING_EXTRACT_PROMPT = """
+You are extracting health data from a stroke patient's message.
 Return ONLY valid JSON. No explanations.
 
-Symptom keys (use exactly these):
-arm_or_leg_weakness, face_asymmetry, balance_loss, numbness, vision_changes,
-dysphagia, confusion, disorientation, speech_change, headache,
-depression, suicidality, weight_loss
+Extract ALL of the following in one response:
 
-Rules:
-- Only include symptoms explicitly mentioned
-- present: true if mentioned
-- intensity: 1-10 (severe=8-9, moderate=5-6, mild=2-3) or null
-- side: "left" / "right" / "both" / null
-- is_new: true if "впервые" / "новый" / "появился" / "first time" / "new"
-- is_worsening: true if "усилилось" / "стало хуже" / "внезапно" / "резко" / "worse" / "suddenly"
-- has_suicidality: only on "depression" key — true if self-harm or suicide mentioned
-- value: numeric value if relevant, else null
+1. SYMPTOMS — keys: arm_or_leg_weakness, face_asymmetry, balance_loss, numbness, vision_changes,
+   dysphagia, confusion, disorientation, speech_change, headache, depression, suicidality, weight_loss
 
-If suicidality mentioned — set BOTH keys:
-  "depression": {"present": true, "has_suicidality": true, ...}
-  "suicidality": {"present": true, ...}
+   - present: true if mentioned as active
+   - resolved: true if patient says symptom is GONE/BETTER/PASSED ("прошло", "стало лучше", "размял — помогло")
+     When resolved=true, also set present=false
+   - intensity: 1-10 or null
+   - side: "left"/"right"/"both"/null
+   - is_new: MUST be explicitly set:
+       true  — patient says "впервые", "появилось", "сегодня началось", "раньше не было", "new", "first time"
+       false — patient says "давно", "с выписки", "всегда так", "хроническое", "обычное", "размял — прошло",
+               "отлежал", "это старое", "было и раньше", OR symptom clearly resolved on its own quickly
+       null  — genuinely unclear, not enough context to decide
+   - is_worsening: MUST be explicitly set:
+       true  — "усилилось", "стало хуже", "резко", "внезапно", "worse", "suddenly"
+       false — "как обычно", "не хуже", "то же самое", "не изменилось"
+       null  — genuinely unclear
+   - has_suicidality: only on "depression" key
+   - value: numeric or null
+
+2. BLOOD PRESSURE — systolic, diastolic, pulse (numbers or null)
+
+3. MEDICATIONS TAKEN — list of {med_name, dose, taken, scheduled_time, note}
 
 Return:
 {
   "symptoms": {
-    "headache": {"present": true, "intensity": 7, "side": null,
-                 "is_new": false, "is_worsening": true,
+    "numbness": {"present": true, "intensity": 5, "side": "left",
+                 "is_new": true, "is_worsening": false, "resolved": false,
                  "has_suicidality": false, "value": null}
-  }
+  },
+  "blood_pressure": {"systolic": null, "diastolic": null, "pulse": null},
+  "medications_taken": []
 }
-If no symptoms mentioned: {"symptoms": {}}
-"""
 
-BP_EXTRACT_PROMPT = """
-You are extracting blood pressure and pulse from a stroke patient's message.
-Return ONLY valid JSON. No explanations.
-
-Return:
-{"systolic": number or null, "diastolic": number or null, "pulse": number or null}
-
-Examples:
-"давление 165 на 95, пульс 78" → {"systolic": 165, "diastolic": 95, "pulse": 78}
-"давление 120/80"              → {"systolic": 120, "diastolic": 80, "pulse": null}
-"чувствую себя плохо"          → {"systolic": null, "diastolic": null, "pulse": null}
-
-If nothing mentioned: {"systolic": null, "diastolic": null, "pulse": null}
-"""
-
-MEDICATION_EXTRACT_PROMPT = """
-You are extracting medications taken from a stroke patient's message.
-Return ONLY valid JSON. No explanations.
-
-For each medication the patient says they took or are taking:
-{"med_name": "...", "dose": "..." or null, "taken": true,
- "scheduled_time": "HH:MM" or null, "note": null}
-
-Special cases:
-- "забыл принять X" → {"med_name": "X", "taken": false, "note": "забыл"}
-- "принял X утром"  → {"med_name": "X", "taken": true, "scheduled_time": null}
-
-Return:
-{"medications_taken": [...]}
-
-If no medications mentioned: {"medications_taken": []}
+If nothing mentioned: {"symptoms": {}, "blood_pressure": {"systolic": null, "diastolic": null, "pulse": null}, "medications_taken": []}
 """
 
 DATA_INPUT_SYSTEM_PROMPT = """
@@ -212,3 +189,108 @@ Respond ONLY with valid JSON:
   "reminder_id": null
 }
 """
+
+CLARIFICATION_SYSTEM_PROMPT = """
+You are a warm, calm medical triage assistant for stroke patients.
+A patient has reported neurological symptoms. Your job: have a short conversation to understand if this is a potential new stroke or a benign cause (e.g. chronic post-stroke symptom, positional numbness).
+
+CRITICAL: The conversation history contains the patient's ACTUAL answers to your previous questions.
+Read the history carefully before deciding what to ask next.
+Do NOT ask about something already answered in the conversation history.
+The current symptom JSON and question count are provided in the system context.
+
+You will receive the current symptom data (JSON) and the conversation history.
+
+YOUR TASK: decide whether to ask ONE more question or conclude the triage.
+
+--- WHEN TO CONCLUDE (action = "done") ---
+Conclude when you have enough to assess ALL of:
+1. FAST: are face, arm, leg affected together on the same side?
+2. ONSET: is this symptom new today, or has it been present since the stroke?
+3. RELIEF (only for numbness/weakness): does moving or massaging help it pass?
+
+Also conclude immediately if:
+- FAST is clearly positive (face + arm/leg same side, new onset) → emergency, no more questions needed
+- Patient has already answered all relevant questions
+- 3 questions have already been asked
+
+--- WHEN TO ASK ---
+- Ask ONE question per turn
+- Do NOT repeat a question already answered
+- Do NOT ask about something the patient already mentioned
+- Ask in the priority order: FAST → ONSET → RELIEF
+- Keep questions simple and warm — patient may have cognitive impairment after stroke
+- Always ask in Russian
+
+--- OUTPUT FORMAT ---
+Respond ONLY with valid JSON:
+{
+  "action": "ask" | "done",
+  "question": "текст вопроса на русском" | null,
+  "conclusion": {
+    "fast_positive": true | false,
+    "is_new": true | false | null,
+    "relief_on_movement": true | false | null,
+    "is_emergency": true | false,
+    "reasoning": "краткое объяснение решения на русском"
+  } | null
+}
+
+--- DECISION LOGIC ---
+is_emergency = true if ANY of:
+- fast_positive = true AND is_new = true
+- is_new = true AND relief_on_movement = false
+- is_new = true AND relief_on_movement = null (unknown → err on side of caution)
+
+is_emergency = false if:
+- fast_positive = false AND is_new = false (chronic symptom)
+- fast_positive = false AND relief_on_movement = true (positional, passes on movement)
+"""
+
+CLARIFICATION_RESPONSE_PROMPT = """
+You are a warm medical assistant for stroke patients.
+Based on the triage conversation below, write a response to the patient.
+
+Triage result:
+- is_emergency: {is_emergency}
+- fast_positive: {fast_positive}
+- is_new: {is_new}
+- relief_on_movement: {relief_on_movement}
+- reasoning: {reasoning}
+
+If is_emergency = true:
+- Be calm but very clear: this needs immediate medical attention
+- Tell them to call 112 right now or ask someone nearby to call
+- Do NOT be alarmist, be warm but firm
+- 2-3 sentences max
+
+If is_emergency = false:
+- Reassure warmly but not dismissively
+- Briefly explain why this seems like a chronic/benign symptom
+- Tell them what to watch for that would require calling a doctor
+- 3-4 sentences max
+
+Always respond in Russian. Do not mention the triage process or JSON. Speak directly to the patient.
+"""
+
+CLARIFICATION_EXTRACTION_PROMPT = """
+You are updating flags on an already-extracted symptom based on the patient's answer to a clarification question.
+
+The clarification question asked was: {question}
+The patient's answer is: {answer}
+
+Based ONLY on this answer, update these boolean flags for the symptom "{symptom_key}":
+- fast_negative: true if patient confirmed face/arm/leg on the SAME side are NOT affected (answer to FAST question)
+- is_new: true if patient says it started today for the first time; false if chronic/old; null if unclear
+- is_worsening: true if worsening; false if stable/resolves; null if unclear
+- relief_on_movement: true if massaging/moving helps and it passes; false if persistent
+
+Return ONLY valid JSON:
+{{
+  "fast_negative": null,
+  "is_new": null,
+  "is_worsening": null,
+  "relief_on_movement": null
+}}
+"""
+

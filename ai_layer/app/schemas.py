@@ -47,11 +47,12 @@ class SymptomEntity(BaseModel):
     intensity: Optional[int] = None
     side: Optional[str] = None
     value: Optional[float] = None
-    is_new: bool = False
-    is_worsening: bool = False
+    is_new: Optional[bool] = None
+    is_worsening: Optional[bool] = None
     has_suicidality: bool = False
+    resolved: bool = False
 
-    @field_validator('present', 'is_new', 'is_worsening', 'has_suicidality', mode='before')
+    @field_validator('present', 'has_suicidality', 'resolved', mode='before')
     @classmethod
     def none_to_false(cls, v: Any) -> bool:
         return v if v is not None else False
@@ -126,7 +127,19 @@ class GraphState(TypedDict, total=False):
     backend_commands: Optional[List[BackendCommand]]
     alert_payload: Optional[RedFlagAlert]
     response_meta: Optional[ResponseMeta]
-
+    # Накопленные симптомы по эпизоду (мерж между турами)
+    accumulated_symptoms: Optional[SymptomsData]
+    # True пока диалог про самочувствие активен
+    symptom_episode_active: Optional[bool]
+    # FAST-дискриминаторы уже проверены
+    fast_checked: Optional[bool]
+    # Pending clarification — бот ждёт ответа на уточняющий вопрос
+    clarification_pending: Optional[bool]
+    # Последний уточняющий вопрос
+    clarification_question: Optional[str]
+    clarification_step: Optional[int] = None         # "fast" | "onset" | "relief" | "done"
+    fast_negative: Optional[bool]              # True = FAST отрицательный (лицо/нога не затронуты)
+    relief_on_movement: Optional[bool]
 
 class ReminderCommand(BaseModel):
     action: str
