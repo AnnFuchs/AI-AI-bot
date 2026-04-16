@@ -82,7 +82,7 @@ export function ChatInput({ disabled = false, onSubmit }: ChatInputProps) {
         />
         <Button
           aria-label="Отправить сообщение"
-          className="size-12 shrink-0"
+          className="size-12 shrink-0 [&_svg]:size-8"
           disabled={isSubmitDisabled}
           onClick={() => {
             void submit();

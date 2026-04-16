@@ -112,7 +112,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         });
       }
 
-      router.push("/");
+      router.push(mode === "register" ? "/onboarding" : "/");
     } catch (caughtError) {
       setError(
         caughtError instanceof Error
