@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { useChatStream } from "../hooks/use-chat-stream";
 import { ChatInput } from "./chat-input";
@@ -8,12 +8,19 @@ import { MessageList } from "./message-list";
 
 export function ChatPage() {
   const { error, messages, sendMessage, status } = useChatStream();
+  const messagesSectionRef = useRef<HTMLElement | null>(null);
   const isStreaming = status === "streaming";
 
   useEffect(() => {
     const frameId = requestAnimationFrame(() => {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
+      const messagesSection = messagesSectionRef.current;
+
+      if (!messagesSection) {
+        return;
+      }
+
+      messagesSection.scrollTo({
+        top: messagesSection.scrollHeight,
         behavior: isStreaming ? "auto" : "smooth",
       });
     });
@@ -24,8 +31,12 @@ export function ChatPage() {
   }, [isStreaming, messages]);
 
   return (
-    <main className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-4xl flex-col gap-5 px-5 pt-5">
-      <section aria-live="polite" className="flex-1">
+    <main className="mx-auto flex h-[calc(100dvh-5rem)] w-full max-w-4xl flex-col gap-5 overflow-hidden px-5 pt-5">
+      <section
+        aria-live="polite"
+        className="min-h-0 flex-1 overflow-y-auto"
+        ref={messagesSectionRef}
+      >
         <MessageList isStreaming={isStreaming} messages={messages} />
       </section>
 

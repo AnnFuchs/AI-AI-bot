@@ -1,4 +1,4 @@
-import type { ChatRequest } from "@/entities";
+import type { AuthToken, ChatRequest } from "@/entities";
 
 type ApiRequestOptions<TBody> = {
   body?: TBody;
@@ -30,8 +30,27 @@ function sse(event: string, data: unknown) {
   return encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
 
+const mockAuthToken: AuthToken = {
+  access_token: "mock-access-token",
+  refresh_token: "mock-refresh-token",
+  token_type: "Bearer",
+};
+
 export const mockAdapter = {
-  async request<TResponse>() {
+  async request<TResponse, TBody>(
+    path?: string,
+    options?: ApiRequestOptions<TBody>,
+  ) {
+    void options;
+
+    if (path === "/auth/login") {
+      return mockAuthToken as TResponse;
+    }
+
+    if (path === "/users/register") {
+      return undefined as TResponse;
+    }
+
     return {} as TResponse;
   },
 

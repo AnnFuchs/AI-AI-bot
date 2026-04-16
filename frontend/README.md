@@ -65,3 +65,23 @@ data: {"type":"token","token":"..."}
 
 data: {"type":"done"}
 ```
+
+## Авторизация
+
+Вход отправляется в существующий endpoint:
+
+```text
+POST /auth/login
+```
+
+Регистрация отправляется в:
+
+```text
+POST /users/register
+```
+
+Форма входа отправляет поля `login` и `password`, где `login` — телефон
+пользователя. Форма регистрации отправляет `phone` и `password`; после успешного
+создания пользователя frontend автоматически вызывает `/auth/login`, сохраняет
+`access_token` и `refresh_token` в `localStorage`, а последующие API-запросы
+получают заголовок `Authorization: Bearer <access_token>`.

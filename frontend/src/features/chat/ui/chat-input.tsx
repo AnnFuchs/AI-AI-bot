@@ -55,10 +55,10 @@ export function ChatInput({ disabled = false, onSubmit }: ChatInputProps) {
         event.preventDefault();
       }}
     >
-      <div className="flex flex-row items-end gap-2">
+      <div className="flex min-w-0 flex-row items-end gap-2">
         <Textarea
           aria-label="Поле ввода сообщения"
-          className="max-h-40 resize-none overflow-hidden tracking-normal"
+          className="min-w-0 flex-1 resize-none overflow-hidden tracking-normal"
           disabled={disabled}
           id="chat-message"
           onKeyDown={(event) => {
@@ -82,7 +82,7 @@ export function ChatInput({ disabled = false, onSubmit }: ChatInputProps) {
         />
         <Button
           aria-label="Отправить сообщение"
-          className="size-12"
+          className="size-12 shrink-0"
           disabled={isSubmitDisabled}
           onClick={() => {
             void submit();
