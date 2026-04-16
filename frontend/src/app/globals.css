@@ -7,10 +7,9 @@
   --foreground: 0 0% 0%;
   --muted: 30 7% 95%;
   --muted-foreground: 60 0% 57%;
-  --border: 188 18% 82%;
   --primary: 122 21% 36%;
   --primary-foreground: 0 0% 100%;
-  --accent: 122 21% 36%;
+  --accent: 0 0% 0%;
   --accent-foreground: 0 0% 100%;
   --destructive: 2 72% 48%;
   --destructive-foreground: 0 0% 100%;

@@ -33,7 +33,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
                                         aria-current={isActive ? "page" : undefined}
                                         aria-label={item.label}
                                         className={cn(
-                                            "flex min-h-12 w-full min-w-12 items-center justify-center rounded-xl p-4 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                                            "flex min-h-12 w-full min-w-12 items-center justify-center rounded-xl p-4 text-black/60 transition-colors hover:bg-muted hover:text-foreground",
                                             isActive && "bg-muted text-foreground",
                                         )}
                                         href={item.href}
