@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pywebpush import WebPushException, webpush
 from sqlalchemy import select
@@ -47,9 +48,8 @@ async def _send_push(
 
 async def check_reminders() -> None:
     """Check are there reminders needed to be activated."""
-    now = datetime.now(tz=timezone.utc)
-    current_time = now.strftime('%H:%M')
-    current_day = DAY_NAMES[now.weekday()]
+    now_utc = datetime.now(tz=timezone.utc)
+    current_time = now_utc.strftime('%H:%M')
 
     async with AsyncSessionLocal() as db:
         result = await db.execute(
@@ -69,7 +69,16 @@ async def check_reminders() -> None:
         reminders = result.scalars().all()
 
         for reminder in reminders:
-            if reminder.days and current_day not in reminder.days:
+            tz = pytz.timezone(reminder.timezone)
+            now_local = now_utc.astimezone(tz)
+            current_time_local = now_local.replace(
+                second=0, microsecond=0,
+            ).timetz()
+            current_day_local = DAY_NAMES[now_local.weekday()]
+
+            if reminder.time != current_time_local:
+                continue
+            if reminder.days and current_day_local not in reminder.days:
                 continue
 
             if not reminder.user.push_subscriptions:
