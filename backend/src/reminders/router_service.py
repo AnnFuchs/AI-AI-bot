@@ -3,6 +3,11 @@ from __future__ import annotations
 import base64
 from uuid import UUID
 
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    PublicFormat,
+    load_pem_public_key,
+)
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -86,7 +91,11 @@ async def remove_push_subscription(
 
 
 def get_decoded_vapid_public_key() -> str:
-    """Decode the base64-encoded VAPID public key."""
-    return base64.b64decode(
-        settings.vapid_public_key.get_secret_value(),
-    ).decode('utf-8')
+    """Return raw EC public key as base64url for applicationServerKey."""
+    pem = base64.b64decode(settings.vapid_public_key.get_secret_value())
+    public_key = load_pem_public_key(pem)
+    raw_bytes = public_key.public_bytes(
+        Encoding.X962,
+        PublicFormat.UncompressedPoint,
+    )
+    return base64.urlsafe_b64encode(raw_bytes).rstrip(b'=').decode('ascii')

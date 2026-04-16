@@ -36,13 +36,14 @@ async def get_active_reminders_due_now() -> list[Reminder]:
 
         tz = pytz.timezone(reminder.user.timezone)
         now_local = now_utc.astimezone(tz)
-        current_time_local = now_local.replace(
-            second=0, microsecond=0,
-        ).timetz()
-        current_day_local = DAY_NAMES[now_local.weekday()]
 
-        if reminder.time != current_time_local:
+        if (
+            reminder.time.hour != now_local.hour
+            or reminder.time.minute != now_local.minute
+        ):
             continue
+
+        current_day_local = DAY_NAMES[now_local.weekday()]
         if reminder.days and current_day_local not in reminder.days:
             continue
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 
@@ -25,19 +26,21 @@ async def _send_push(
 ) -> None:
     data = json.dumps({'title': title, 'body': body})
     try:
-        webpush(
-            subscription_info={
-                'endpoint': subscription.endpoint,
-                'keys': {
-                    'p256dh': subscription.p256dh,
-                    'auth': subscription.auth,
+        await asyncio.get_event_loop().run_in_executor(
+            lambda: webpush(
+                subscription_info={
+                    'endpoint': subscription.endpoint,
+                    'keys': {
+                        'p256dh': subscription.p256dh,
+                        'auth': subscription.auth,
+                    },
                 },
-            },
-            data=data,
-            vapid_private_key=base64.b64decode(
-                settings.vapid_private_key.get_secret_value(),
-            ).decode('utf-8'),
-            vapid_claims={'sub': settings.vapid_claims_email},
+                data=data,
+                vapid_private_key=base64.b64decode(
+                    settings.vapid_private_key.get_secret_value(),
+                ).decode('utf-8'),
+                vapid_claims={'sub': settings.vapid_claims_email},
+            ),
         )
     except WebPushException as e:
         if e.response and e.response.status_code == 410:
