@@ -81,6 +81,54 @@ export const mockAdapter = {
             controller.enqueue(sse("token", { token }));
           }
 
+          await wait(220, options.signal);
+          controller.enqueue(
+            sse("text", {
+              text: " Могу также показать памятку, если ответ кажется недостаточным.",
+            }),
+          );
+
+          await wait(220, options.signal);
+          controller.enqueue(
+            sse("button", {
+              label: "Открыть памятку",
+              href: "/learn/articles/when-to-see-a-doctor",
+            }),
+          );
+
+          await wait(220, options.signal);
+          controller.enqueue(
+            sse("alert", {
+              payload: {
+                red_flags: [
+                  {
+                    name: "headache",
+                    level: "emergency",
+                    description: "Внезапная сильная головная боль",
+                    target_info: "Возможное субарахноидальное кровоизлияние",
+                  },
+                ],
+                message: "Позвоните 112 немедленно!",
+              },
+            }),
+          );
+
+          await wait(220, options.signal);
+          controller.enqueue(
+            sse("sources", {
+              payload: {
+                confidence: 0.82,
+                confidence_label: "high",
+                sources: [
+                  {
+                    source: "Клинические_рекомендации_Ишемический_инсульт_2024.pdf",
+                  },
+                ],
+                used_rag: true,
+              },
+            }),
+          );
+
           controller.enqueue(sse("done", { conversationId: "mock-conversation" }));
           controller.close();
         } catch (error) {
