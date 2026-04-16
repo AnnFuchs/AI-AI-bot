@@ -27,9 +27,9 @@ class UserContext(BaseModel):
     stroke_type: Optional[str] = None
     stroke_toast_subtype: Optional[str] = None
     stroke_hemo_subtype: Optional[str] = None
-    medications: List[Medication] = []  # объекты от бэкенда: {name, dose_mg, frequency}
+    medications: Optional[List[Medication]] = None # объекты от бэкенда: {name, dose_mg, frequency}
     age_category: Optional[str] = None  # "18-44" | "45-65" | "65+"
-    known_symptoms: List[str] = []      # populated by backend from diary history
+    known_symptoms: Optional[List[str]] = []      # populated by backend from diary history
     doctor_id: Optional[str] = None
 
 

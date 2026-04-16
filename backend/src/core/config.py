@@ -10,16 +10,17 @@ BASE_DIR = Path(__file__).parent.parent
 class Settings(BaseSettings):
     """App settings."""
 
-    app_title: str = 'AI-AI Stroke buddy.'
-    app_description: str = 'Poststroke AI Assistant.'
+    APP_TITLE: str = 'AI-AI Stroke buddy.'
+    APP_DESCRIPTION: str = 'Poststroke AI Assistant.'
 
-    postgres_user: str
-    postgres_password: SecretStr
-    postgres_db: str
-    postgres_server: str
-    postgres_port: int
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: SecretStr
+    POSTGRES_DB: str
+    POSTGRES_SERVER: str
+    POSTGRES_PORT: int
+    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
-    @field_validator('postgres_port')
+    @field_validator('POSTGRES_PORT')
     @classmethod
     def check_port(cls, value: int) -> int:
         """Port validator."""
@@ -31,10 +32,10 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         """Db URL maker."""
         return (
-            f'postgresql+asyncpg://{self.postgres_user}:'
-            f'{self.postgres_password.get_secret_value()}'
-            f'@{self.postgres_server}:'
-            f'{self.postgres_port}/{self.postgres_db}'
+            f'postgresql+asyncpg://{self.POSTGRES_USER}:'
+            f'{self.POSTGRES_PASSWORD.get_secret_value()}'
+            f'@{self.POSTGRES_SERVER}:'
+            f'{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
         )
 
     secret_key: SecretStr
