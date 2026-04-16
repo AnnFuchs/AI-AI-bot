@@ -51,7 +51,11 @@ class Settings(BaseSettings):
     first_superuser_phone: PhoneNumber
     first_superuser_password: SecretStr
 
-    AI_LAYER_URL: str = 'http://localhost:8001'
+    ai_layer_url: str = 'http://localhost:8001'
+
+    vapid_private_key: SecretStr
+    vapid_public_key: SecretStr
+    vapid_claims_email: str
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR.parent / 'infra' / '.env',

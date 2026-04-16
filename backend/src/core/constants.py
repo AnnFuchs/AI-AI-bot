@@ -82,3 +82,12 @@ ACCOUNT_INACTIVE_EXCEPTIONS = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
     detail='Account deactivated.',
 )
+DAY_NAMES = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
+]
