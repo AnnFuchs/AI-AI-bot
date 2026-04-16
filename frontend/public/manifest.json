@@ -1,0 +1,18 @@
+{
+  "name": "Ай-яй инсультный бадди",
+  "short_name": "Ай-яй",
+  "description": "Помощник для восстановления после инсульта: самочувствие, напоминания, поддержка",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F9F8F7",
+  "theme_color": "#486F49",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
