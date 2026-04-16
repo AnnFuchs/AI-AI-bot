@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/shared/ui/button";
-import { Checkbox } from "@/shared/ui/checkbox";
 import { Input } from "@/shared/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
+import type { Role, Sex, StrokeType } from "@/entities";
+
+import { updateCurrentUser } from "../api/user-service";
 
 const strokeTypeOptions = [
   { value: "ischemic", label: "Ишемический" },
@@ -14,10 +16,15 @@ const strokeTypeOptions = [
   { value: "unknown", label: "Не знаю" },
 ];
 
+function getRoleFromStrokeOwner(strokeOwner: string): Role {
+  return strokeOwner === "close-person" ? "relative" : "patient";
+}
+
 type DateFieldProps = {
   id: string;
   label: string;
   hint?: string;
+  disabled?: boolean;
   value: string;
   onChange: (value: string) => void;
 };
@@ -28,19 +35,9 @@ export function OnboardingQuestionsForm() {
   const [birthDate, setBirthDate] = useState("");
   const [sex, setSex] = useState("");
   const [strokeDate, setStrokeDate] = useState("");
-  const [strokeTypes, setStrokeTypes] = useState<string[]>([]);
+  const [strokeType, setStrokeType] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  function toggleStrokeType(value: string, checked: boolean) {
-    setError(null);
-    setStrokeTypes((current) => {
-      if (checked) {
-        return [...current, value];
-      }
-
-      return current.filter((item) => item !== value);
-    });
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
     <div className="flex min-h-[calc(100svh-3rem)] w-full max-w-sm flex-col min-[375px]:min-h-[calc(100svh-4rem)]">
@@ -48,20 +45,42 @@ export function OnboardingQuestionsForm() {
         className="flex flex-1 flex-col gap-7 min-[375px]:gap-8"
         id="onboarding-questions-form"
         noValidate
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
 
-          if (!strokeOwner || !birthDate || !sex || !strokeDate || strokeTypes.length === 0) {
-            setError("Заполните, пожалуйста, все поля.");
+          if (!strokeOwner || !birthDate || !sex || !strokeDate || !strokeType) {
+            setError("Пожалуйста, заполните все поля.");
             return;
           }
 
-          router.push("/");
+          setError(null);
+          setIsSubmitting(true);
+
+          try {
+            await updateCurrentUser({
+              date_of_birth: birthDate,
+              role: getRoleFromStrokeOwner(strokeOwner),
+              sex: sex as Sex,
+              stroke_date: strokeDate,
+              stroke_type: strokeType as StrokeType,
+            });
+
+            router.push("/");
+          } catch (caughtError) {
+            setError(
+              caughtError instanceof Error
+                ? caughtError.message
+                : "Не получилось сохранить данные. Попробуйте еще раз.",
+            );
+          } finally {
+            setIsSubmitting(false);
+          }
         }}
       >
         <fieldset>
           <RadioGroup
             className="flex flex-col gap-3"
+            disabled={isSubmitting}
             name="stroke-owner"
             onValueChange={(value) => {
               setStrokeOwner(value);
@@ -83,6 +102,7 @@ export function OnboardingQuestionsForm() {
         <DateField
           id="birth-date"
           label="Дата рождения"
+          disabled={isSubmitting}
           onChange={(value) => {
             setBirthDate(value);
             setError(null);
@@ -94,6 +114,7 @@ export function OnboardingQuestionsForm() {
           <legend className="mb-3 text-lg leading-6 min-[375px]:text-xl">Пол</legend>
           <RadioGroup
             className="flex flex-wrap gap-4"
+            disabled={isSubmitting}
             name="sex"
             onValueChange={(value) => {
               setSex(value);
@@ -116,6 +137,7 @@ export function OnboardingQuestionsForm() {
           hint="Если точная дата неизвестна, укажите примерную"
           id="stroke-date"
           label="Дата инсульта"
+          disabled={isSubmitting}
           onChange={(value) => {
             setStrokeDate(value);
             setError(null);
@@ -125,22 +147,26 @@ export function OnboardingQuestionsForm() {
 
         <fieldset>
           <legend className="mb-3 text-lg leading-6 min-[375px]:text-xl">Тип инсульта</legend>
-          <div className="flex flex-col gap-3">
+          <RadioGroup
+            className="flex flex-col gap-3"
+            disabled={isSubmitting}
+            name="stroke-type"
+            onValueChange={(value) => {
+              setStrokeType(value);
+              setError(null);
+            }}
+            value={strokeType}
+          >
             {strokeTypeOptions.map((option) => (
               <label
                 className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl"
                 key={option.value}
               >
-                <Checkbox
-                  checked={strokeTypes.includes(option.value)}
-                  onCheckedChange={(checked) => {
-                    toggleStrokeType(option.value, checked === true);
-                  }}
-                />
+                <RadioGroupItem value={option.value} />
                 <span className="min-w-0">{option.label}</span>
               </label>
             ))}
-          </div>
+          </RadioGroup>
         </fieldset>
 
         {error ? (
@@ -152,6 +178,7 @@ export function OnboardingQuestionsForm() {
 
       <Button
         className="mt-6 w-full min-[375px]:mt-8"
+        disabled={isSubmitting}
         form="onboarding-questions-form"
         type="submit"
       >
@@ -162,7 +189,7 @@ export function OnboardingQuestionsForm() {
   );
 }
 
-function DateField({ hint, id, label, onChange, value }: DateFieldProps) {
+function DateField({ disabled, hint, id, label, onChange, value }: DateFieldProps) {
   return (
     <section className="flex flex-col gap-2">
       <label className="text-lg leading-6 min-[375px]:text-xl" htmlFor={id}>
@@ -171,6 +198,7 @@ function DateField({ hint, id, label, onChange, value }: DateFieldProps) {
       <Input
         autoComplete={id === "birth-date" ? "bday" : "off"}
         className="w-full max-w-[220px] text-lg min-[375px]:text-xl"
+        disabled={disabled}
         id={id}
         onChange={(event) => {
           onChange(event.currentTarget.value);

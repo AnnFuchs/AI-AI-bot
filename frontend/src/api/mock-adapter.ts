@@ -51,6 +51,10 @@ export const mockAdapter = {
       return undefined as TResponse;
     }
 
+    if (path === "/users/me") {
+      return (options?.body ?? {}) as TResponse;
+    }
+
     return {} as TResponse;
   },
 

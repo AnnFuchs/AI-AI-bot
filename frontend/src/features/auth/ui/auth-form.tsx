@@ -75,6 +75,10 @@ function normalizePhoneForApi(value: string) {
   return digits.length === 11 ? `+${digits}` : "";
 }
 
+function isValidRegistrationPassword(password: string) {
+  return /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password);
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +100,13 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     if (!phone) {
       setError("Введите номер телефона полностью.");
+      return;
+    }
+
+    if (mode === "register" && !isValidRegistrationPassword(values.password)) {
+      setError(
+        "Пароль должен быть не короче 8 символов и содержать заглавную букву, строчную букву и цифру.",
+      );
       return;
     }
 
