@@ -108,6 +108,22 @@ class ResponseType(str, Enum):
     text_with_buttons = "text_with_buttons"
     alert = "alert"
 
+class TriageQAPair(BaseModel):
+    question: str
+    answer: str
+    expanded: str
+
+class TriageKnown(BaseModel):
+    is_new: Optional[bool] = None
+    fast_positive: Optional[bool] = None
+    relief_on_movement: Optional[bool] = None
+
+class ClarificationTriageState(BaseModel):
+    symptoms: Dict[str, Any] = {}
+    qa_pairs: List[TriageQAPair] = []
+    known: TriageKnown = TriageKnown()
+    questions_asked: int = 0
+
 
 class GraphState(TypedDict, total=False):
     user_message: str
@@ -140,6 +156,7 @@ class GraphState(TypedDict, total=False):
     clarification_step: Optional[int] = None         # "fast" | "onset" | "relief" | "done"
     fast_negative: Optional[bool]              # True = FAST отрицательный (лицо/нога не затронуты)
     relief_on_movement: Optional[bool]
+    clarification_triage_state: Optional[ClarificationTriageState]
 
 class ReminderCommand(BaseModel):
     action: str
@@ -148,6 +165,4 @@ class ReminderCommand(BaseModel):
     days: Optional[List[str]] = None
     med_name: Optional[str] = None
     reminder_id: Optional[str] = None
-
-
 

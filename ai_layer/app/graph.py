@@ -11,7 +11,7 @@ from app.config import settings
 from app.schemas import (
     GraphState, IntentEnum, ResponseType, SymptomsData, SymptomEntity,
     RedFlag, RedFlagAlert, BackendCommand, Button, UserContext, MedicationTaken,
-    SourceReference, ResponseMeta
+    SourceReference, ResponseMeta, ClarificationTriageState, TriageQAPair, TriageKnown
 )
 from app.prompts import (
     CLASSIFIER_SYSTEM_PROMPT, WELLBEING_SYSTEM_PROMPT, WELLBEING_EXTRACT_PROMPT,
@@ -561,26 +561,71 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         questions_asked = state.get("clarification_step") or 0
         if not isinstance(questions_asked, int):
             questions_asked = 0
+
+        # ── Build / update structured triage state ────────────────────────────
+        raw_triage = state.get("clarification_triage_state")
+        if isinstance(raw_triage, dict):
+            try:
+                triage_state = ClarificationTriageState(**raw_triage)
+            except Exception as e:
+                logger.warning(f"ClarificationTriageState parse failed: {e}")
+                triage_state = ClarificationTriageState(symptoms=symptoms_summary)
+        elif isinstance(raw_triage, ClarificationTriageState):
+            triage_state = raw_triage
+        else:
+            triage_state = ClarificationTriageState(symptoms=symptoms_summary)
+
+        # Always sync symptoms and step
+        triage_state.symptoms = symptoms_summary
+        triage_state.questions_asked = questions_asked
+
+        # ── Expand and record latest Q&A pair ─────────────────────────────────
         last_question = state.get("clarification_question") or ""
         last_patient_answer = next(
             (m["content"] for m in reversed(history) if m["role"] == "user"),
             ""
         )
-        # Expand short answers to help GigaChat understand context
-        expanded_answer = await _expand_short_answer(
-            last_question, last_patient_answer, llm_handler
-        )
 
+        if last_question and last_patient_answer:
+            already_recorded = any(
+                qa.question == last_question for qa in triage_state.qa_pairs
+            )
+            if not already_recorded:
+                expanded = last_patient_answer
+                if len(last_patient_answer.split()) <= 5:
+                    try:
+                        expanded = await llm_handler.chat_completion([
+                            {
+                                "role": "user",
+                                "content": (
+                                    f"Вопрос был задан пациенту: «{last_question}»\n"
+                                    f"Пациент ответил: «{last_patient_answer}»\n"
+                                    "Перефразируй ответ пациента в одно полное информативное "
+                                    "предложение, сохраняя смысл. Только предложение, без пояснений."
+                                )
+                            }
+                        ])
+                        expanded = expanded.strip()
+                        logger.info(f"Expanded: «{last_patient_answer}» → «{expanded}»")
+                    except Exception as e:
+                        logger.warning(f"Answer expansion failed: {e}")
+
+                triage_state.qa_pairs.append(TriageQAPair(
+                    question=last_question,
+                    answer=last_patient_answer,
+                    expanded=expanded,
+                ))
+
+        # ── Build compact prompt ───────────────────────────────────────────────
         system_with_context = (
                 CLARIFICATION_SYSTEM_PROMPT
-                + f"\n\n[Текущие симптомы пациента]\n{json.dumps(symptoms_summary, ensure_ascii=False, indent=2)}"
-                + f"\n\n[Уже задано уточняющих вопросов: {questions_asked}]"
-                + (f"\n\n[Последний ответ пациента (развёрнуто)]: «{expanded_answer}»" if expanded_answer else "")
+                + f"\n\nТекущее состояние триажа (JSON):\n{triage_state.model_dump_json(indent=2)}"
         )
-        triage_messages = (
-                [{"role": "system", "content": system_with_context}]
-                + history
-        )
+
+        triage_messages = [
+            {"role": "system", "content": system_with_context},
+            {"role": "user", "content": "Проанализируй состояние триажа и верни JSON."},
+        ]
 
         try:
             raw = await llm_handler.chat_completion(
@@ -593,23 +638,12 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
             logger.error(f"Clarification triage error: {e}")
             result = {}
 
-        # GigaChat sometimes returns empty JSON on short patient answers — retry once
+        # Retry if empty
         if not result.get("action"):
-            logger.warning(f"Clarification empty result, retrying. Last patient answer: «{last_patient_answer}»")
-            retry_messages = [
-                {
-                    "role": "system",
-                    "content": (
-                            system_with_context
-                            + f"\n\nПациент только что ответил: «{last_patient_answer}»\n"
-                              "Обработай этот ответ и верни JSON с action=ask или action=done."
-                    )
-                },
-                {"role": "user", "content": last_patient_answer}
-            ]
+            logger.warning("Clarification empty — retrying")
             try:
                 raw2 = await llm_handler.chat_completion(
-                    retry_messages,
+                    triage_messages,
                     response_format={"type": "json_object"}
                 )
                 result = safe_json(raw2)
@@ -617,9 +651,8 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
             except Exception as e:
                 logger.error(f"Clarification retry failed: {e}")
 
-        # Last resort fallback
         if not result.get("action"):
-            logger.error("Clarification: retry also failed — forcing done")
+            logger.error("Clarification: both attempts failed — forcing done")
             result = {
                 "action": "done",
                 "conclusion": {
@@ -696,6 +729,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 "clarification_pending": False,
                 "clarification_step": 0,
                 "clarification_question": None,
+                "clarification_triage_state": None,
                 "fast_checked": True,
                 "symptom_entities": symptoms,
                 "red_flags": flags,
@@ -712,6 +746,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
             "clarification_pending": True,
             "clarification_step": questions_asked + 1,
             "clarification_question": question,
+            "clarification_triage_state": triage_state,
             "symptom_entities": symptoms,
         }
 
