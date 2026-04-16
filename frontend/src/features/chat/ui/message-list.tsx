@@ -64,15 +64,15 @@ function WelcomeMessage() {
       </p>
       <p>Еще есть много полезной информации в Базе знаний. Например:</p>
       <div className="flex flex-col items-start gap-2">
-        <Button asChild className="w-fit" variant="chat" size="xl">
+        <Button asChild className="w-fit" variant="chat">
           <Link href="/learn/articles/when-to-see-a-doctor">
             Когда стоит обратиться к врачу?
           </Link>
         </Button>
-        <Button asChild className="w-fit" variant="chat" size="xl">
+        <Button asChild className="w-fit" variant="chat">
           <Link href="/learn/articles/what-is-stroke">Что такое инсульт?</Link>
         </Button>
-          <Button asChild className="w-fit" variant="chat" size="xl">
+          <Button asChild className="w-fit" variant="chat">
               <Link href="/learn/articles/what-to-do-after-a-stroke">Инсульт – что делать дальше?</Link>
           </Button>
       </div>

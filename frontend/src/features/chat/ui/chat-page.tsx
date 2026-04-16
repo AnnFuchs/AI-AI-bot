@@ -24,7 +24,7 @@ export function ChatPage() {
   }, [isStreaming, messages]);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-5 pt-5">
+    <main className="mx-auto flex min-h-[calc(100dvh-5rem)] w-full max-w-4xl flex-col gap-5 px-5 pt-5">
       <section aria-live="polite" className="flex-1">
         <MessageList isStreaming={isStreaming} messages={messages} />
       </section>
