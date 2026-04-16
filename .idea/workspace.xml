@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
+    <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas">
+      <change afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ai_layer/app/schemas.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_layer/app/schemas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/infra/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/infra/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,6 +22,7 @@
       <list>
         <option value="TypeScript JSX File" />
         <option value="Jupyter Notebook" />
+        <option value="Dockerfile" />
       </list>
     </option>
   </component>
@@ -122,6 +119,15 @@
       <workItem from="1776182472823" duration="13620000" />
       <workItem from="1776267401419" duration="25283000" />
     </task>
+    <task id="LOCAL-00001" summary="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas">
+      <option name="closed" value="true" />
+      <created>1776342520268</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1776342520268</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,6 +146,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="refactor: align schemas and diary entries with backend API contracts&#10;&#10;- Add `Medication` model (name, dose_mg, frequency) and replace `List[str]` medications in `UserContext`&#10;- Update age_category values to backend AgeGroup format (&quot;18-44&quot;, &quot;45-65&quot;, &quot;65+&quot;)&#10;- Remove `has_stenosis` field from `UserContext` and `SymptomsData`; update BP thresholds accordingly&#10;- Split diary entry saving: blood sugar now saved as &quot;blood_test&quot; entry type instead of generic &quot;measurement&quot;&#10;- Drop weight_kg and temperature_c from measurement prompt and diary commands&#10;- Add `stroke_date` and `doctor_id` fields to `UserContext`&#10;- Add `none_to_false` validator on `SymptomEntity` boolean fields to handle null values" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor: align schemas and diary entries with backend API contracts&#10;&#10;- Add `Medication` model (name, dose_mg, frequency) and replace `List[str]` medications in `UserContext`&#10;- Update age_category values to backend AgeGroup format (&quot;18-44&quot;, &quot;45-65&quot;, &quot;65+&quot;)&#10;- Remove `has_stenosis` field from `UserContext` and `SymptomsData`; update BP thresholds accordingly&#10;- Split diary entry saving: blood sugar now saved as &quot;blood_test&quot; entry type instead of generic &quot;measurement&quot;&#10;- Drop weight_kg and temperature_c from measurement prompt and diary commands&#10;- Add `stroke_date` and `doctor_id` fields to `UserContext`&#10;- Add `none_to_false` validator on `SymptomEntity` boolean fields to handle null values" />
+    <MESSAGE value="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas" />
   </component>
 </project>
