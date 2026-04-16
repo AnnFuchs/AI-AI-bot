@@ -9,7 +9,7 @@ from pywebpush import WebPushException, webpush
 from src.core.config import settings
 from src.core.logger import logger
 from src.reminders.models import PushSubscription
-from src.reminders.service import (
+from src.reminders.scheduler_service import (
     delete_push_subscription_by_id,
     get_active_reminders_due_now,
 )
