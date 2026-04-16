@@ -29,7 +29,7 @@ export function ChatPage() {
         <MessageList isStreaming={isStreaming} messages={messages} />
       </section>
 
-      <section className="sticky bottom-0 z-10 bg-background pb-5 pt-3">
+      <section className="sticky bottom-0 z-10 bg-background pb-5 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-5 before:bg-gradient-to-t before:from-background before:to-transparent">
         {error ? (
           <p className="mb-3 text-base text-destructive" role="alert">
             {error}

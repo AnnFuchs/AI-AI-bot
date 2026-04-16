@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/shared/layout/app-shell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/shared/layout/app-shell.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
