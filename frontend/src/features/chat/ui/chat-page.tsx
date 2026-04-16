@@ -31,10 +31,10 @@ export function ChatPage() {
   }, [isStreaming, messages]);
 
   return (
-    <main className="relative mx-auto flex h-[calc(100dvh-5rem)] w-full max-w-4xl flex-col overflow-hidden px-5">
+    <main className="relative mx-auto flex h-[calc(100dvh-4.25rem)] w-full max-w-4xl flex-col overflow-hidden px-4 min-[375px]:h-[calc(100dvh-5rem)] min-[375px]:px-5">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-5 top-0 z-10 h-5 bg-gradient-to-b from-background to-transparent"
+        className="pointer-events-none absolute inset-x-4 top-0 z-10 h-5 bg-gradient-to-b from-background to-transparent min-[375px]:inset-x-5"
       />
       <section
         aria-live="polite"

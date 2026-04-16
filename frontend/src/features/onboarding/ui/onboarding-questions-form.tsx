@@ -43,9 +43,9 @@ export function OnboardingQuestionsForm() {
   }
 
   return (
-    <div className="flex min-h-full w-full max-w-sm flex-col">
+    <div className="flex min-h-[calc(100svh-3rem)] w-full max-w-sm flex-col min-[375px]:min-h-[calc(100svh-4rem)]">
       <form
-        className="flex flex-1 flex-col gap-8"
+        className="flex flex-1 flex-col gap-7 min-[375px]:gap-8"
         id="onboarding-questions-form"
         noValidate
         onSubmit={(event) => {
@@ -69,13 +69,13 @@ export function OnboardingQuestionsForm() {
             }}
             value={strokeOwner}
           >
-            <label className="flex items-center gap-3 text-xl leading-6">
+            <label className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
               <RadioGroupItem value="self" />
-              У меня был инсульт
+              <span className="min-w-0">У меня был инсульт</span>
             </label>
-            <label className="flex items-center gap-3 text-xl leading-6">
+            <label className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
               <RadioGroupItem value="close-person" />
-              У моего близкого был инсульт
+              <span className="min-w-0">У моего близкого был инсульт</span>
             </label>
           </RadioGroup>
         </fieldset>
@@ -91,7 +91,7 @@ export function OnboardingQuestionsForm() {
         />
 
         <fieldset>
-          <legend className="mb-3 text-xl leading-6">Пол</legend>
+          <legend className="mb-3 text-lg leading-6 min-[375px]:text-xl">Пол</legend>
           <RadioGroup
             className="flex flex-wrap gap-4"
             name="sex"
@@ -101,11 +101,11 @@ export function OnboardingQuestionsForm() {
             }}
             value={sex}
           >
-            <label className="flex items-center gap-3 text-xl leading-6">
+            <label className="flex items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
               <RadioGroupItem value="male" />
               Муж
             </label>
-            <label className="flex items-center gap-3 text-xl leading-6">
+            <label className="flex items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
               <RadioGroupItem value="female" />
               Жен
             </label>
@@ -124,11 +124,11 @@ export function OnboardingQuestionsForm() {
         />
 
         <fieldset>
-          <legend className="mb-3 text-xl leading-6">Тип инсульта</legend>
+          <legend className="mb-3 text-lg leading-6 min-[375px]:text-xl">Тип инсульта</legend>
           <div className="flex flex-col gap-3">
             {strokeTypeOptions.map((option) => (
               <label
-                className="flex items-center gap-3 text-xl leading-6"
+                className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl"
                 key={option.value}
               >
                 <Checkbox
@@ -137,7 +137,7 @@ export function OnboardingQuestionsForm() {
                     toggleStrokeType(option.value, checked === true);
                   }}
                 />
-                {option.label}
+                <span className="min-w-0">{option.label}</span>
               </label>
             ))}
           </div>
@@ -150,7 +150,11 @@ export function OnboardingQuestionsForm() {
         ) : null}
       </form>
 
-      <Button className="mt-8" form="onboarding-questions-form" type="submit">
+      <Button
+        className="mt-6 w-full min-[375px]:mt-8"
+        form="onboarding-questions-form"
+        type="submit"
+      >
         Готово
         <ArrowRightIcon aria-hidden="true" />
       </Button>
@@ -161,12 +165,12 @@ export function OnboardingQuestionsForm() {
 function DateField({ hint, id, label, onChange, value }: DateFieldProps) {
   return (
     <section className="flex flex-col gap-2">
-      <label className="text-xl leading-6" htmlFor={id}>
+      <label className="text-lg leading-6 min-[375px]:text-xl" htmlFor={id}>
         {label}
       </label>
       <Input
         autoComplete={id === "birth-date" ? "bday" : "off"}
-        className="w-full max-w-[220px] text-xl"
+        className="w-full max-w-[220px] text-lg min-[375px]:text-xl"
         id={id}
         onChange={(event) => {
           onChange(event.currentTarget.value);
@@ -175,7 +179,9 @@ function DateField({ hint, id, label, onChange, value }: DateFieldProps) {
         value={value}
       />
       {hint ? (
-        <p className="text-lg leading-6 text-muted-foreground">{hint}</p>
+        <p className="max-w-[280px] text-base leading-6 text-muted-foreground min-[375px]:text-lg">
+          {hint}
+        </p>
       ) : null}
     </section>
   );

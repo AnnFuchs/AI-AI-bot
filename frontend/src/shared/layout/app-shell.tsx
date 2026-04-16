@@ -25,9 +25,9 @@ export function AppShell({children}: { children: React.ReactNode }) {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             {!isAuthPage ? (
-                <header className="sticky top-0 z-20 bg-background p-2 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-5 after:bg-gradient-to-b after:from-background after:to-transparent">
+                <header className="sticky top-0 z-20 bg-background p-1.5 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-5 after:bg-gradient-to-b after:from-background after:to-transparent min-[375px]:p-2">
                     <nav aria-label="Разделы приложения" className="mx-auto w-full max-w-4xl">
-                        <ul className="flex min-h-16 w-full items-center gap-2">
+                        <ul className="flex min-h-14 w-full items-center gap-1.5 min-[375px]:min-h-16 min-[375px]:gap-2">
                             {navItems.map((item) => {
                                 const isActive =
                                     item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -36,7 +36,7 @@ export function AppShell({children}: { children: React.ReactNode }) {
                                 return (
                                     <li className="flex-1" key={item.href}>
                                         <Button asChild variant="ghost" className={cn(
-                                            "h-16 w-full [&_svg]:size-8",
+                                            "h-14 w-full [&_svg]:size-8 min-[375px]:h-16",
                                             isActive && "bg-muted text-foreground",
                                         )}>
                                             <Link

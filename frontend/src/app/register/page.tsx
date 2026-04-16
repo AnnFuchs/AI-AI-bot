@@ -4,14 +4,14 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   return (
-    <main className="flex min-h-dvh w-full flex-col items-center justify-center p-5">
+    <main className="flex min-h-[100svh] w-full flex-col items-center justify-center px-4 py-6 min-[375px]:p-5">
       <AuthForm mode="register" />
-      <div className="mt-12 flex w-full max-w-[300px] flex-col gap-4">
+      <div className="mt-10 flex w-full max-w-[300px] flex-col gap-3 min-[375px]:mt-12 min-[375px]:gap-4">
         <div className="h-px w-full bg-border" />
         <p className="text-center text-lg text-muted-foreground">
           Уже зарегистрированы?
         </p>
-        <Button asChild className="w-full text-xl leading-6 text-muted-foreground" variant="outline">
+        <Button asChild className="w-full text-lg leading-6 text-muted-foreground min-[375px]:text-xl" variant="outline">
           <Link href="/login">Войти</Link>
         </Button>
       </div>

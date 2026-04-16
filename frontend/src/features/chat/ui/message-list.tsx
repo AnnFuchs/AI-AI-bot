@@ -64,17 +64,31 @@ function WelcomeMessage() {
       </p>
       <p>Еще есть много полезной информации в Базе знаний. Например:</p>
       <div className="flex flex-col items-start gap-2">
-        <Button asChild className="w-fit" variant="chat">
+        <Button
+          asChild
+          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+          variant="chat"
+        >
           <Link href="/learn/articles/when-to-see-a-doctor">
             Когда стоит обратиться к врачу?
           </Link>
         </Button>
-        <Button asChild className="w-fit" variant="chat">
+        <Button
+          asChild
+          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+          variant="chat"
+        >
           <Link href="/learn/articles/what-is-stroke">Что такое инсульт?</Link>
         </Button>
-          <Button asChild className="w-fit" variant="chat">
-              <Link href="/learn/articles/what-to-do-after-a-stroke">Инсульт – что делать дальше?</Link>
-          </Button>
+        <Button
+          asChild
+          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+          variant="chat"
+        >
+          <Link href="/learn/articles/what-to-do-after-a-stroke">
+            Инсульт – что делать дальше?
+          </Link>
+        </Button>
       </div>
       <p>Не стесняйтесь спрашивать, я постараюсь помочь! =)</p>
     </div>

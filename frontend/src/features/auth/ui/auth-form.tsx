@@ -123,11 +123,14 @@ export function AuthForm({ mode }: AuthFormProps) {
   });
 
   return (
-    <form className="max-w-[300px] w-full mx-auto flex flex-col gap-6" onSubmit={onSubmit}>
+    <form
+      className="mx-auto flex w-full max-w-[300px] flex-col gap-5 min-[375px]:gap-6"
+      onSubmit={onSubmit}
+    >
       <div>
-        <label htmlFor={`${mode}-login`} className="text-xl">Телефон</label>
+        <label htmlFor={`${mode}-login`} className="text-lg min-[375px]:text-xl">Телефон</label>
         <Input
-            className="mt-2 text-xl"
+            className="mt-2 text-lg min-[375px]:text-xl"
             autoComplete="tel"
             disabled={isSubmitting}
             id={`${mode}-login`}
@@ -149,9 +152,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       </div>
 
       <div>
-        <label htmlFor={`${mode}-password`} className="text-xl">Пароль</label>
+        <label htmlFor={`${mode}-password`} className="text-lg min-[375px]:text-xl">Пароль</label>
         <Input
-            className="mt-2 text-xl"
+            className="mt-2 text-lg min-[375px]:text-xl"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             disabled={isSubmitting}
             id={`${mode}-password`}
@@ -162,7 +165,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {error ? <p role="alert">{error}</p> : null}
 
-      <Button disabled={isSubmitting} type="submit" className="text-xl leading-6">
+      <Button disabled={isSubmitting} type="submit" className="text-lg leading-6 min-[375px]:text-xl">
         {submitText}
       </Button>
     </form>
