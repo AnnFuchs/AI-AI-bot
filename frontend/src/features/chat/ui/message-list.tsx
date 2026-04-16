@@ -20,7 +20,7 @@ export function MessageList({ messages, isStreaming }: MessageListProps) {
             <li className="ml-auto flex max-w-[85%] flex-col" key={message.id}>
               <p className="mb-2 text-sm font-semibold text-muted-foreground">Вы:</p>
               <div className="rounded-xl bg-black/5 px-4 py-3 text-foreground">
-                <p className="whitespace-pre-wrap text-lg leading-6">
+                <p className="whitespace-pre-wrap break-words text-lg leading-6">
                   {message.content}
                 </p>
               </div>
@@ -39,7 +39,7 @@ export function MessageList({ messages, isStreaming }: MessageListProps) {
             {isWelcomeMessage ? (
               <WelcomeMessage />
             ) : (
-              <p className="whitespace-pre-wrap text-lg leading-6">
+              <p className="whitespace-pre-wrap break-words text-lg leading-6">
                 {message.content || (isStreaming ? "Думаю..." : "")}
               </p>
             )}

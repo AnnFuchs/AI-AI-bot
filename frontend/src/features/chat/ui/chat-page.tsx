@@ -31,16 +31,20 @@ export function ChatPage() {
   }, [isStreaming, messages]);
 
   return (
-    <main className="mx-auto flex h-[calc(100dvh-5rem)] w-full max-w-4xl flex-col gap-5 overflow-hidden px-5 pt-5">
+    <main className="relative mx-auto flex h-[calc(100dvh-5rem)] w-full max-w-4xl flex-col overflow-hidden px-5">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-5 top-0 z-10 h-5 bg-gradient-to-b from-background to-transparent"
+      />
       <section
         aria-live="polite"
-        className="min-h-0 flex-1 overflow-y-auto"
+        className="min-h-0 flex-1 overflow-y-auto pb-3 pt-5"
         ref={messagesSectionRef}
       >
         <MessageList isStreaming={isStreaming} messages={messages} />
       </section>
 
-      <section className="sticky bottom-0 z-10 bg-background pb-5 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-5 before:bg-gradient-to-t before:from-background before:to-transparent">
+      <section className="relative z-10 bg-background pb-5 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-5 before:bg-gradient-to-t before:from-background before:to-transparent">
         {error ? (
           <p className="mb-3 text-base text-destructive" role="alert">
             {error}
