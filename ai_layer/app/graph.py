@@ -55,7 +55,8 @@ def _build_patient_context_str(user_context: Optional[UserContext]) -> str:
     if user_context.stroke_toast_subtype:
         parts.append(f"Подтип инсульта: {user_context.stroke_toast_subtype}")
     if user_context.medications:
-        parts.append(f"Принимаемые препараты: {', '.join(user_context.medications)}")
+        med_names = ", ".join(m.name for m in user_context.medications)
+        parts.append(f"Принимаемые препараты: {med_names}")
     if user_context.role and user_context.role != "patient":
         parts.append(f"Роль пользователя: {user_context.role}")
     if not parts:
@@ -272,11 +273,6 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
         if user_ctx:
             symptoms.age_category = symptoms.age_category or user_ctx.age_category
-            symptoms.has_stenosis = (
-                symptoms.has_stenosis
-                if symptoms.has_stenosis is not None
-                else user_ctx.has_stenosis
-            )
             if user_ctx.known_symptoms:
                 symptoms = _enrich_symptoms_with_history(symptoms, user_ctx.known_symptoms)
 
@@ -412,6 +408,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         user_id = state.get("user_id")
         commands = []
 
+        # Blood pressure → entry_type: "blood_pressure"
         if data.get("systolic_bp") or data.get("diastolic_bp"):
             commands.append(BackendCommand(
                 command_type="SAVE_DIARY_ENTRY",
@@ -426,18 +423,17 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 }
             ).model_dump())
 
-        other_fields = {
-            k: data[k] for k in ("blood_sugar", "weight_kg", "temperature_c")
-            if data.get(k) is not None
-        }
-        if other_fields:
-            other_fields["user_message_raw"] = state["user_message"]
+        # Blood sugar → entry_type: "blood_test" (EntryType.BLOOD_TEST на бэкенде)
+        if data.get("blood_sugar") is not None:
             commands.append(BackendCommand(
                 command_type="SAVE_DIARY_ENTRY",
                 payload={
                     "user_id": user_id,
-                    "entry_type": "measurement",
-                    "entry_json": other_fields
+                    "entry_type": "blood_test",
+                    "entry_json": {
+                        "blood_sugar": data.get("blood_sugar"),
+                        "user_message_raw": state["user_message"],
+                    }
                 }
             ).model_dump())
 

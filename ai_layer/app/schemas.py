@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Optional, List, Any, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing_extensions import TypedDict
 
 
@@ -14,26 +14,38 @@ class IntentEnum(str, Enum):
     off_topic = "off_topic"
 
 
+class Medication(BaseModel):
+    name: str
+    dose_mg: int
+    frequency: str
+
+
 class UserContext(BaseModel):
     user_id: str
     role: str = "patient"
+    stroke_date: Optional[str] = None
     stroke_type: Optional[str] = None
     stroke_toast_subtype: Optional[str] = None
     stroke_hemo_subtype: Optional[str] = None
-    medications: List[str] = []
-    age_category: Optional[str] = None  # "young" | "middle" | "old_independent" | "old_dependent"
-    has_stenosis: Optional[bool] = None
-    known_symptoms: List[str] = []     # populated by backend from diary history
+    medications: List[Medication] = []  # объекты от бэкенда: {name, dose_mg, frequency}
+    age_category: Optional[str] = None  # "18-44" | "45-65" | "65+"
+    known_symptoms: List[str] = []      # populated by backend from diary history
+    doctor_id: Optional[str] = None
 
 
 class SymptomEntity(BaseModel):
     present: bool = False
-    intensity: Optional[int] = None    # 1-10
+    intensity: Optional[int] = None
     side: Optional[str] = None
     value: Optional[float] = None
     is_new: bool = False
     is_worsening: bool = False
-    has_suicidality: bool = False      # only for depression key
+    has_suicidality: bool = False
+
+    @field_validator('present', 'is_new', 'is_worsening', 'has_suicidality', mode='before')
+    @classmethod
+    def none_to_false(cls, v: Any) -> bool:
+        return v if v is not None else False
 
 
 class BloodPressureReading(BaseModel):
@@ -56,9 +68,7 @@ class SymptomsData(BaseModel):
     free_text: str = ""
     blood_pressure: Optional[BloodPressureReading] = None
     medications_taken: List[MedicationTaken] = []
-    # patient context for personalised BP thresholds
-    age_category: Optional[str] = None
-    has_stenosis: Optional[bool] = None
+    age_category: Optional[str] = None  # передаётся из UserContext для BP-порогов
 
 
 class RedFlag(BaseModel):

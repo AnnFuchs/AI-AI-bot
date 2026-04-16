@@ -28,14 +28,19 @@ STROKE_SYMPTOM_DESCRIPTIONS = {
 
 
 def _get_bp_thresholds(symptoms: SymptomsData):
-    """Return (systolic_target, diastolic_target) based on patient context."""
-    age_category = symptoms.age_category or "middle"
-    has_stenosis = symptoms.has_stenosis or False
+    """Return (systolic_target, diastolic_target) based on age category from backend.
 
-    if has_stenosis:
-        return 150, 90
-    if age_category in ("old_independent", "old_dependent"):
+    Backend sends age_category as AgeGroup enum values:
+      "18-44"  → young
+      "45-65"  → middle
+      "65+"    → old
+    """
+    age_category = symptoms.age_category or "45-65"
+
+    if age_category == "65+":
         return 140, 90
+
+    # "18-44" and "45-65" → standard target
     return 130, 80
 
 

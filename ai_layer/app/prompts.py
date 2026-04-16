@@ -135,17 +135,13 @@ Extract whatever is present, leave others null:
 - systolic_bp, diastolic_bp: blood pressure in mmHg
 - pulse: beats per minute
 - blood_sugar: mmol/L
-- weight_kg: kilograms
-- temperature_c: celsius
 
 Respond ONLY with valid JSON:
 {
   "systolic_bp": 120,
   "diastolic_bp": 80,
   "pulse": 72,
-  "blood_sugar": null,
-  "weight_kg": null,
-  "temperature_c": null
+  "blood_sugar": null
 }
 """
 
