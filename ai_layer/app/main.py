@@ -81,6 +81,8 @@ async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, No
                 yield f"data: {json.dumps({'type': 'buttons', 'payload': event.get('payload')}, ensure_ascii=False)}\n\n"
             elif event_type == "error":
                 yield f"data: {json.dumps({'type': 'error', 'message': event.get('message')}, ensure_ascii=False)}\n\n"
+            elif event_type == "sources":
+                yield f"data: {json.dumps({'type': 'sources', 'payload': event.get('payload')}, ensure_ascii=False)}\n\n"
 
         yield f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
 

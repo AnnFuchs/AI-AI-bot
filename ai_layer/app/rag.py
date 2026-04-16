@@ -140,7 +140,8 @@ class RAGService:
                 {
                     "id": point.id,
                     "score": top_cosine_score if i == 0 else point.score,
-                    "content": point.payload.get("parent_content", point.payload.get("content", ""))
+                    "content": point.payload.get("parent_content", point.payload.get("content", "")),
+                    "source": point.payload.get("metadata", {}).get("source", "")
                 } for i, point in enumerate(results.points)
             ]
 

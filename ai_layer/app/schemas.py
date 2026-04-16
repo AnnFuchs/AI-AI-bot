@@ -3,6 +3,15 @@ from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, field_validator
 from typing_extensions import TypedDict
 
+class SourceReference(BaseModel):
+    source: str      # "Клинические_рекомендации_Ишемический_инсульт_2024.pdf"
+
+class ResponseMeta(BaseModel):
+    confidence: float
+    confidence_label: str               # "high" | "medium" | "low" | "insufficient"
+    sources: List[SourceReference] = []
+    intent: str
+    used_rag: bool
 
 class IntentEnum(str, Enum):
     wellbeing_check = "wellbeing_check"
@@ -116,6 +125,7 @@ class GraphState(TypedDict, total=False):
     buttons: Optional[List[Button]]
     backend_commands: Optional[List[BackendCommand]]
     alert_payload: Optional[RedFlagAlert]
+    response_meta: Optional[ResponseMeta]
 
 
 class ReminderCommand(BaseModel):
@@ -125,3 +135,6 @@ class ReminderCommand(BaseModel):
     days: Optional[List[str]] = None
     med_name: Optional[str] = None
     reminder_id: Optional[str] = None
+
+
+

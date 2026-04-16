@@ -10,7 +10,8 @@ from langgraph.config import get_stream_writer
 from app.config import settings
 from app.schemas import (
     GraphState, IntentEnum, ResponseType, SymptomsData, RedFlag, RedFlagAlert,
-    BackendCommand, Button, UserContext, MedicationTaken, BloodPressureReading
+    BackendCommand, Button, UserContext, MedicationTaken,
+    SourceReference, ResponseMeta
 )
 from app.prompts import (
     CLASSIFIER_SYSTEM_PROMPT, WELLBEING_SYSTEM_PROMPT, SYMPTOM_EXTRACT_PROMPT,
@@ -74,6 +75,14 @@ def _enrich_symptoms_with_history(
             logger.info(f"Symptom '{sym_key}' marked as NEW (not in history)")
     return symptoms
 
+def _build_confidence_label(score: float) -> str:
+    if score >= 0.75:
+        return "high"
+    elif score >= 0.55:
+        return "medium"
+    elif score >= 0.35:
+        return "low"
+    return "insufficient"
 
 def _assess_wellbeing_heuristic(symptoms: SymptomsData) -> str:
     bp = symptoms.blood_pressure
@@ -460,23 +469,67 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         subtype = user_ctx.stroke_toast_subtype if user_ctx else None
 
         for coll in collections:
+            try:
+                info = await rag_service.qdrant_client.get_collection(coll)
+                logger.info(f"Collection '{coll}' points_count={info.points_count}")
+                logger.info(f"Vectors config: {info.config.params.vectors}")
+
+                sample = await rag_service.qdrant_client.scroll(
+                    collection_name=coll, limit=1,
+                    with_payload=True, with_vectors=True
+                )
+                if sample[0]:
+                    p = sample[0][0]
+                    test_query = p.payload['content'][50:150].strip()
+                    logger.info(f"Test query: {test_query}")
+                    test_res = await rag_service.qdrant_client.query_points(
+                        collection_name=coll,
+                        query=await rag_service.llm_handler.get_embedding(test_query),
+                        using="dense",
+                        limit=3,
+                        score_threshold=0.0,
+                        with_payload=False
+                    )
+                    logger.info(f"Self-search result: {test_res}")
+            except Exception as e:
+                logger.error(f"Failed to get collection info for '{coll}': {e}")
+
             res = await rag_service.search(coll, state["user_message"], stroke_subtype=subtype)
             docs.extend(res)
             scores.extend([d["score"] for d in res])
 
-        logger.info(f"RAG results: {len(docs)} docs, scores: {[round(s, 3) for s in scores]}")
+        logger.info(f"RAG Results: {docs}")
         rag_conf = max(scores) if scores else 0.0
+        confidence_label = _build_confidence_label(rag_conf)
 
-        if rag_conf < 0.2:
+        # Собираем источники из метаданных
+        sources = [
+            SourceReference(source=d.get("source", ""))
+            for d in docs[:5]
+            if d.get("source")
+        ]
+
+        intent = state.get("intent", IntentEnum.education)
+
+        if confidence_label == "insufficient":
             fallback_text = "К сожалению, точной информации не найдено. Вот общая памятка."
             buttons = [Button(label="Общая памятка", payload={"action": "guide"}).model_dump()]
-            write({"type": "text", "content": fallback_text})
+            meta = ResponseMeta(
+                confidence=rag_conf,
+                confidence_label=confidence_label,
+                sources=[],
+                intent=str(intent),
+                used_rag=True,
+            )
             write({"type": "buttons", "payload": buttons})
+            write({"type": "token", "content": fallback_text})
+            write({"type": "sources", "payload": meta.model_dump()})
             return {
                 "response_text": fallback_text,
                 "response_type": ResponseType.text_with_buttons,
                 "buttons": buttons,
-                "backend_commands": []
+                "backend_commands": [],
+                "response_meta": meta,
             }
 
         context = "\n\n".join([d["content"] for d in docs[:5]])
@@ -490,15 +543,24 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 full_text += token
                 write({"type": "token", "content": token})
         except Exception as e:
-            logger.error(f"Education stream error: {e}")
+            logger.error(f"Education Stream Error: {e}")
             full_text = "Произошла ошибка при генерации ответа."
-            write({"type": "text", "content": full_text})
+
+        meta = ResponseMeta(
+            confidence=rag_conf,
+            confidence_label=confidence_label,
+            sources=sources,
+            intent=str(intent),
+            used_rag=True,
+        )
+        write({"type": "sources", "payload": meta.model_dump()})
 
         return {
             "response_text": full_text,
             "response_type": ResponseType.text,
             "messages": history + [{"role": "assistant", "content": full_text}],
-            "backend_commands": []
+            "backend_commands": [],
+            "response_meta": meta,
         }
 
     async def emotional_node(state: GraphState) -> Dict[str, Any]:
