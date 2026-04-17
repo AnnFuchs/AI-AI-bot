@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/shared/ui/button";
+import { ArrowRightIcon } from "@/shared/ui/icons/arrow-right-icon";
 import { Input } from "@/shared/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/shared/ui/radio-group";
 import type { Role, Sex, StrokeType } from "@/entities";
@@ -212,19 +213,5 @@ function DateField({ disabled, hint, id, label, onChange, value }: DateFieldProp
         </p>
       ) : null}
     </section>
-  );
-}
-
-function ArrowRightIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg fill="none" viewBox="0 0 32 32" {...props}>
-      <path
-        d="M6.66669 16H25.3334M25.3334 16L17.3334 8M25.3334 16L17.3334 24"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.5"
-      />
-    </svg>
   );
 }

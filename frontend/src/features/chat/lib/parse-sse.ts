@@ -62,6 +62,18 @@ function readEventPayload(payload: ParsedPayload | null) {
   return isObject(payload.payload) ? payload.payload : payload;
 }
 
+function readButtonPayload(payload: ParsedPayload) {
+  if (isObject(payload.button)) {
+    return payload.button;
+  }
+
+  if (isObject(payload.payload)) {
+    return payload.payload;
+  }
+
+  return payload;
+}
+
 function readObjectList(payload: ParsedPayload, key: string) {
   const value = payload[key];
 
@@ -140,7 +152,7 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
     }
 
     if (payloadObject) {
-      const buttonPayload = eventPayload ?? payloadObject;
+      const buttonPayload = readButtonPayload(payloadObject);
 
       return {
         type: "button",

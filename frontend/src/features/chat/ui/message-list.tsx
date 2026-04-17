@@ -2,6 +2,17 @@ import Link from "next/link";
 
 import type { ChatMessage } from "@/entities";
 import { Button } from "@/shared/ui/button";
+import { ArrowRightIcon } from "@/shared/ui/icons/arrow-right-icon";
+
+import { STROKE_INFO_ACTION } from "../lib/chat-actions";
+
+function isExternalHref(href: string) {
+  return href.startsWith("http://") || href.startsWith("https://");
+}
+
+function isStrokeInfoHref(href: string) {
+  return href === STROKE_INFO_ACTION.href;
+}
 
 type MessageListProps = {
   messages: ChatMessage[];
@@ -76,7 +87,16 @@ function AssistantMessage({
               key={action.id}
               variant="chat"
             >
-              <Link href={action.href}>{action.label}</Link>
+              <Link
+                href={action.href}
+                rel={isExternalHref(action.href) ? "noreferrer" : undefined}
+                target={isExternalHref(action.href) ? "_blank" : undefined}
+              >
+                {action.label}
+                {isStrokeInfoHref(action.href) ? (
+                  <ArrowRightIcon aria-hidden="true" />
+                ) : null}
+              </Link>
             </Button>
           ))}
         </div>
