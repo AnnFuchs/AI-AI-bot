@@ -33,7 +33,7 @@ class RAGService:
     async def _get_hyde_vector(self, query: str) -> List[float]:
         try:
             messages = [{"role": "system", "content": HYDE_PROMPT.format(query=query)}]
-            hypothetical_doc = await self.llm_handler.chat_completion(messages)
+            hypothetical_doc = await self.llm_handler.chat_completion(messages, temperature=0.0)
             logger.info(f"HyDE generated doc: {hypothetical_doc[:100]}...")
             return await self.llm_handler.get_embedding(hypothetical_doc)
         except Exception as e:
@@ -56,11 +56,16 @@ class RAGService:
     async def search(self, collection_name: str, query: str, stroke_subtype: Optional[str] = None, top_k: int = 5) -> \
             List[Dict[str, Any]]:
         try:
-            # 1. Получаем оба вектора параллельно
-            dense_vector, sparse_vector = await asyncio.gather(
-                self._get_hyde_vector(query),
-                self.get_sparse_embedding(query)
-            )
+            # 1. Получаем HYDE вектор, raw вектор и sparse параллельно
+            messages = [{"role": "system", "content": HYDE_PROMPT.format(query=query)}]
+            hyde_text = await self.llm_handler.chat_completion(messages, temperature=0.0)
+
+            # 2. Получаем оба вектора одним батчем (1 запрос Embedding)
+            vectors = await self.llm_handler.get_embeddings_batch([hyde_text, query])
+            dense_vector, raw_vector = vectors[0], vectors[1]
+
+            # 3. Sparse делается локально
+            sparse_vector = await self.get_sparse_embedding(query)
 
             # 2. Настройка фильтра
             search_filter = None
@@ -96,10 +101,9 @@ class RAGService:
             # 4. Фоллбек если гибридный поиск не дал результатов
             if not results.points:
                 logger.info("Hybrid search returned no results, retrying with direct embedding...")
-                direct_vector = await self.llm_handler.get_embedding(query)
                 results = await self.qdrant_client.query_points(
                     collection_name=collection_name,
-                    query=direct_vector,
+                    query=raw_vector,
                     using="dense",
                     query_filter=search_filter,
                     limit=top_k,
@@ -109,37 +113,52 @@ class RAGService:
             if not results.points:
                 return []
 
-            # 5. Получаем косинусный score топового результата для решения о фоллбэке
+            # 5. Получаем косинусный score топового чанка по HYDE и по raw запросу параллельно
             top_id = results.points[0].id
-            cosine_check = await self.qdrant_client.query_points(
-                collection_name=collection_name,
-                query=dense_vector,
-                using="dense",
-                query_filter=models.Filter(
-                    must=[models.HasIdCondition(has_id=[top_id])]
+            id_filter = models.Filter(must=[models.HasIdCondition(has_id=[top_id])])
+
+            hyde_check, raw_check = await asyncio.gather(
+                self.qdrant_client.query_points(
+                    collection_name=collection_name,
+                    query=dense_vector,
+                    using="dense",
+                    query_filter=id_filter,
+                    limit=1,
+                    with_payload=False,
                 ),
-                limit=1,
-                with_payload=False,
+                self.qdrant_client.query_points(
+                    collection_name=collection_name,
+                    query=raw_vector,
+                    using="dense",
+                    query_filter=id_filter,
+                    limit=1,
+                    with_payload=False,
+                )
             )
-            top_cosine_score = cosine_check.points[0].score if cosine_check.points else 0.0
+
+            hyde_cosine = hyde_check.points[0].score if hyde_check.points else 0.0
+            raw_cosine = raw_check.points[0].score if raw_check.points else 0.0
+            avg_confidence = (hyde_cosine + raw_cosine) / 2
 
             # 6. Логирование
+            logger.info(
+                f"TOP CHUNK | id={top_id} | "
+                f"hyde_cosine={hyde_cosine:.4f} | raw_cosine={raw_cosine:.4f} | avg_confidence={avg_confidence:.4f}"
+            )
             for i, point in enumerate(results.points):
                 parent_content = point.payload.get("parent_content", point.payload.get("content", ""))
                 logger.info(
                     f"Chunk [{i + 1}/{len(results.points)}] | "
                     f"id={point.id} | "
                     f"rrf_score={point.score:.4f} | "
-                    f"{'[TOP] cosine_score=' + str(round(top_cosine_score, 4)) + ' | ' if i == 0 else ''}"
                     f"parent_content={parent_content[:200]}..."
                 )
 
-            # 7. Возвращаем: для топового документа score = косинусное расстояние,
-            #    для остальных — rrf score (используется только для порядка, не для фоллбэка)
+            # 7. Возвращаем: для топового score = среднее HYDE и raw косинусов
             return [
                 {
                     "id": point.id,
-                    "score": top_cosine_score if i == 0 else point.score,
+                    "score": avg_confidence if i == 0 else point.score,
                     "content": point.payload.get("parent_content", point.payload.get("content", "")),
                     "source": point.payload.get("metadata", {}).get("source", "")
                 } for i, point in enumerate(results.points)

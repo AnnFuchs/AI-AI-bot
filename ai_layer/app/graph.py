@@ -477,9 +477,6 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 "Некоторые показатели требуют внимания врача. "
                 "Рекомендую обратиться к врачу сегодня."
             )
-            buttons = [
-                Button(label="Связаться с врачом", payload={"action": "call_doctor"}).model_dump()
-            ]
             diary_commands = _build_diary_commands(
                 symptoms=symptoms,
                 user_id=state.get("user_id", ""),
@@ -488,7 +485,6 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
             write({"type": "token", "content": urgent_text})
             write({"type": "alert", "payload": RedFlagAlert(red_flags=flags, message=urgent_text).model_dump()})
-            write({"type": "buttons", "payload": buttons})
             if diary_commands:
                 write({"type": "commands", "payload": diary_commands})
 
@@ -498,8 +494,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 "symptom_episode_active": True,
                 "red_flags": flags,
                 "response_text": urgent_text,
-                "response_type": ResponseType.text_with_buttons,
-                "buttons": buttons,
+                "response_type": ResponseType.text,
                 "messages": history + [{"role": "assistant", "content": urgent_text}],
                 "backend_commands": diary_commands,
             }
@@ -874,24 +869,6 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 info = await rag_service.qdrant_client.get_collection(coll)
                 logger.info(f"Collection '{coll}' points_count={info.points_count}")
                 logger.info(f"Vectors config: {info.config.params.vectors}")
-
-                sample = await rag_service.qdrant_client.scroll(
-                    collection_name=coll, limit=1,
-                    with_payload=True, with_vectors=True
-                )
-                if sample[0]:
-                    p = sample[0][0]
-                    test_query = p.payload['content'][50:150].strip()
-                    logger.info(f"Test query: {test_query}")
-                    test_res = await rag_service.qdrant_client.query_points(
-                        collection_name=coll,
-                        query=await rag_service.llm_handler.get_embedding(test_query),
-                        using="dense",
-                        limit=3,
-                        score_threshold=0.0,
-                        with_payload=False
-                    )
-                    logger.info(f"Self-search result: {test_res}")
             except Exception as e:
                 logger.error(f"Failed to get collection info for '{coll}': {e}")
 
@@ -913,7 +890,6 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
 
         if confidence_label == "insufficient":
             fallback_text = "К сожалению, точной информации не найдено. Вот общая памятка."
-            buttons = [Button(label="Общая памятка", payload={"action": "guide"}).model_dump()]
             meta = ResponseMeta(
                 confidence=rag_conf,
                 confidence_label=confidence_label,
@@ -921,13 +897,13 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
                 intent=str(intent),
                 used_rag=True,
             )
-            write({"type": "buttons", "payload": buttons})
+            write({"type": "buttons", "payload": [Button(label="Общая памятка", href="/learn").model_dump()]})
             write({"type": "token", "content": fallback_text})
             write({"type": "sources", "payload": meta.model_dump()})
             return {
                 "response_text": fallback_text,
                 "response_type": ResponseType.text_with_buttons,
-                "buttons": buttons,
+                "buttons": [Button(label="Общая памятка", href="/learn")],
                 "backend_commands": [],
                 "response_meta": meta,
             }
@@ -1076,6 +1052,9 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
     def route_after_wellbeing(state: GraphState) -> str:
         if state.get("clarification_pending"):
             return "clarification_node"
+        red_flags = state.get("red_flags") or []
+        if any(f.level in ("emergency", "urgent") for f in red_flags):
+            return "__end__"
         return "education_node"
 
     workflow = StateGraph(GraphState)
@@ -1106,6 +1085,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
     workflow.add_conditional_edges("wellbeing_node", route_after_wellbeing, {
         "clarification_node": "clarification_node",
         "education_node": "education_node",
+        "__end__": END,
     })
 
     workflow.add_edge("clarification_node", END)

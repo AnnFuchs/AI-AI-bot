@@ -32,6 +32,7 @@ class LLMHandler:
         self,
         messages: List[Dict[str, str]],
         response_format: Optional[Dict] = None,
+        temperature: float = 0.7,
     ) -> str:
         payload = Chat(
             model=settings.OPENAI_MODEL,
@@ -42,6 +43,7 @@ class LLMHandler:
                 )
                 for m in messages
             ],
+            temperature=temperature,
         )
         for attempt in range(3):
             try:
@@ -56,7 +58,7 @@ class LLMHandler:
         return ""
 
     async def chat_completion_stream(
-        self, messages: List[Dict[str, str]]
+        self, messages: List[Dict[str, str]], temperature: float = 0.5,
     ) -> AsyncGenerator[str, None]:
         payload = Chat(
             model=settings.OPENAI_MODEL,
@@ -68,6 +70,7 @@ class LLMHandler:
                 for m in messages
             ],
             stream=True,
+            temperature=temperature,
         )
         try:
             async for chunk in self.client.astream(payload):
@@ -78,19 +81,14 @@ class LLMHandler:
             logger.error(f"Streaming Chat Error: {e}")
             yield "Произошла ошибка при генерации ответа."
 
-    async def get_embedding(self, text: str) -> List[float]:
+    async def get_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
         loop = asyncio.get_event_loop()
-
         for attempt in range(3):
             try:
-                embeddings = await loop.run_in_executor(
-                    None, self.gigachat_embeddings.embed_documents, [text]
+                return await loop.run_in_executor(
+                    None, self.gigachat_embeddings.embed_documents, texts
                 )
-                return embeddings[0]
             except Exception as e:
-                logger.warning(f"get_embedding attempt {attempt + 1} failed: {e}")
-                if attempt == 2:
-                    raise
+                if attempt == 2: raise
                 await asyncio.sleep(2 ** attempt)
-
         return []

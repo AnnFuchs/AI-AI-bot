@@ -100,7 +100,7 @@ class BackendCommand(BaseModel):
 
 class Button(BaseModel):
     label: str
-    payload: Dict[str, Any]
+    href: str
 
 
 class ResponseType(str, Enum):
