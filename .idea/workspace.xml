@@ -4,35 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas">
-      <change afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
+    <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="16825" />
-    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
-  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="TypeScript JSX File" />
-        <option value="Jupyter Notebook" />
-        <option value="Dockerfile" />
       </list>
     </option>
-  </component>
-  <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="origin/feature/frontend" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="dev" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -49,10 +40,6 @@
     &quot;accountId&quot;: &quot;1f6a37f6-b1f3-4fcf-9f0c-485e1c204e77&quot;
   }
 }</component>
-  <component name="McpProjectServerCommands">
-    <commands />
-    <urls />
-  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -61,28 +48,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "dev",
-    "js.debugger.nextJs.config.created.client": "true",
-    "js.debugger.nextJs.config.created.server": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync",
-    "ts.external.directory.path": "C:\\Users\\ktoto\\Documents\\petProjects\\AI-AI-bot\\frontend\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/frontend&quot;,
+    &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
+    &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\ktoto\\Documents\\petProjects\\AI-AI-bot\\frontend\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\AI-AI-bot\backend\infra" />
       <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\src\shared\ui" />
     </key>
   </component>
@@ -119,34 +105,9 @@
       <workItem from="1776182472823" duration="13620000" />
       <workItem from="1776267401419" duration="25283000" />
     </task>
-    <task id="LOCAL-00001" summary="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas">
-      <option name="closed" value="true" />
-      <created>1776342520268</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1776342520268</updated>
-    </task>
-    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="refactor: align schemas and diary entries with backend API contracts&#10;&#10;- Add `Medication` model (name, dose_mg, frequency) and replace `List[str]` medications in `UserContext`&#10;- Update age_category values to backend AgeGroup format (&quot;18-44&quot;, &quot;45-65&quot;, &quot;65+&quot;)&#10;- Remove `has_stenosis` field from `UserContext` and `SymptomsData`; update BP thresholds accordingly&#10;- Split diary entry saving: blood sugar now saved as &quot;blood_test&quot; entry type instead of generic &quot;measurement&quot;&#10;- Drop weight_kg and temperature_c from measurement prompt and diary commands&#10;- Add `stroke_date` and `doctor_id` fields to `UserContext`&#10;- Add `none_to_false` validator on `SymptomEntity` boolean fields to handle null values" />
-    <MESSAGE value="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore(backend): uppercase env vars, add CORS, fix docker volume; fix ai_layer optional fields&#10;&#10;- Rename Settings fields to UPPERCASE (POSTGRES_*, APP_TITLE, APP_DESCRIPTION)&#10;- Add CORS_ORIGINS config and CORSMiddleware to FastAPI app&#10;- Fix docker-compose: switch postgres volume to named volume&#10;- Update .gitignore to ignore infra/.env instead of .env&#10;- Make `medications` and `known_symptoms` Optional in UserContext schemas" />
   </component>
 </project>

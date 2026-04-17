@@ -22,6 +22,13 @@ function createMessage(role: ChatMessage["role"], content: string): ChatMessage 
   };
 }
 
+function appendAssistantContent(message: ChatMessage, content: string): ChatMessage {
+  return {
+    ...message,
+    content: `${message.content}${content}`,
+  };
+}
+
 export function useChatStream() {
   const sessionIdRef = useRef(createId());
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -32,11 +39,59 @@ export function useChatStream() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const applyEvent = useCallback((event: SSEEvent, assistantMessageId: string) => {
-    if (event.type === "token") {
+    if (event.type === "token" || event.type === "text") {
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
-            ? { ...message, content: `${message.content}${event.token}` }
+            ? appendAssistantContent(
+                message,
+                event.type === "token" ? event.token : event.text,
+              )
+            : message,
+        ),
+      );
+    }
+
+    if (event.type === "button") {
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === assistantMessageId
+            ? {
+                ...message,
+                actions: [
+                  ...(message.actions ?? []),
+                  {
+                    id: createId(),
+                    ...event.button,
+                  },
+                ],
+              }
+            : message,
+        ),
+      );
+    }
+
+    if (event.type === "alert") {
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === assistantMessageId
+            ? {
+                ...message,
+                alerts: [...(message.alerts ?? []), event.alert],
+              }
+            : message,
+        ),
+      );
+    }
+
+    if (event.type === "sources") {
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === assistantMessageId
+            ? {
+                ...message,
+                sources: [...(message.sources ?? []), event.sources],
+              }
             : message,
         ),
       );
