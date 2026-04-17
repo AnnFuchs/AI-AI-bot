@@ -91,3 +91,17 @@ DAY_NAMES = [
     'saturday',
     'sunday',
 ]
+
+
+class SourceType(StrEnum):
+    """Type of source."""
+
+    CR = 'Клинические рекомендации'
+    BOOK = 'Книга'
+    FOND = 'Информация от фонда'
+    DOC = 'Материалы врача'
+
+
+SOURCE_NAME_LEN = 254
+SOURCE_URL_LEN = 2048
+SOURCE_YEAR_START = 2000
