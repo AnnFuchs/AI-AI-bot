@@ -190,7 +190,12 @@ function SourcesBlock({
             {sources.sources.map((source, index) => (
               <li className="break-words" key={`${source.source}-${index}`}>
                 {source.url ? (
-                  <Link className="underline" href={source.url}>
+                  <Link
+                    className="underline"
+                    href={source.url}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
                     {source.title ?? source.source}
                   </Link>
                 ) : (

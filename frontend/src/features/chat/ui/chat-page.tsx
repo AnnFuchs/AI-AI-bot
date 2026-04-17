@@ -44,11 +44,11 @@ export function ChatPage() {
     <main className="relative mx-auto flex h-[calc(100dvh-4.25rem)] w-full max-w-4xl flex-col overflow-hidden px-4 min-[375px]:h-[calc(100dvh-5rem)] min-[375px]:px-5">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-4 top-0 z-10 h-5 bg-gradient-to-b from-background to-transparent min-[375px]:inset-x-5"
+        className="pointer-events-none absolute inset-x-4 top-0 z-10 h-3 bg-gradient-to-b from-background to-transparent min-[375px]:inset-x-5"
       />
       <section
         aria-live="polite"
-        className="min-h-0 flex-1 overflow-y-auto pb-3 pt-5"
+        className="-mr-3 min-h-0 flex-1 overflow-y-auto pb-3 pr-3 pt-3"
         ref={messagesSectionRef}
       >
         <MessageList
@@ -58,7 +58,7 @@ export function ChatPage() {
         />
       </section>
 
-      <section className="relative z-10 bg-background pb-5 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-5 before:bg-gradient-to-t before:from-background before:to-transparent">
+      <section className="relative z-10 bg-background pb-5 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-gradient-to-t before:from-background before:to-transparent">
         {error ? (
           <p className="mb-3 text-base text-destructive" role="alert">
             {error}
