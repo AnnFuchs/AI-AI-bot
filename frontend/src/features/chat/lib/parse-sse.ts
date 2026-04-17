@@ -2,6 +2,8 @@ import type { SSEEvent } from "@/entities";
 
 type ParsedPayload = Record<string, unknown>;
 
+const URL_PATTERN = /https?:\/\/\S+/;
+
 function parseData(data: string) {
   if (!data) {
     return {};
@@ -82,6 +84,44 @@ function readObjectList(payload: ParsedPayload, key: string) {
   }
 
   return value.filter(isObject);
+}
+
+function parseFormattedSource(source: string) {
+  const trimmedSource = source.trim();
+  const url = trimmedSource.match(URL_PATTERN)?.[0];
+  const title = url ? trimmedSource.replace(url, "").trim() : trimmedSource;
+
+  return {
+    source: title || trimmedSource,
+    title: title || trimmedSource,
+    url,
+  };
+}
+
+function readSources(payload: ParsedPayload) {
+  const value = payload.sources;
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((source) => {
+      if (typeof source === "string") {
+        return parseFormattedSource(source);
+      }
+
+      if (isObject(source)) {
+        return {
+          source: readString(source, ["source", "name"]) ?? "",
+          title: readString(source, ["title"]),
+          url: readString(source, ["url", "href", "link"]),
+        };
+      }
+
+      return null;
+    })
+    .filter((source) => source !== null);
 }
 
 export function parseSSEFrame(frame: string): SSEEvent | null {
@@ -192,11 +232,7 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
   }
 
   if (eventType === "sources" && eventPayload) {
-    const sources = readObjectList(eventPayload, "sources").map((source) => ({
-      source: readString(source, ["source", "name"]) ?? "",
-      title: readString(source, ["title"]),
-      url: readString(source, ["url", "href", "link"]),
-    }));
+    const sources = readSources(eventPayload);
 
     return {
       type: "sources",

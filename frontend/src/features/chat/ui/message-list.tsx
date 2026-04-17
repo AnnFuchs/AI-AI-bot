@@ -14,12 +14,32 @@ function isStrokeInfoHref(href: string) {
   return href === STROKE_INFO_ACTION.href;
 }
 
+function formatConfidenceLabel(label?: string) {
+  if (!label) {
+    return undefined;
+  }
+
+  const labels: Record<string, string> = {
+    high: "высокая",
+    medium: "средняя",
+    low: "низкая",
+    insufficient: "недостаточная",
+  };
+
+  return labels[label] ?? label;
+}
+
 type MessageListProps = {
   messages: ChatMessage[];
   isStreaming: boolean;
+  onSourcesOpen: () => void;
 };
 
-export function MessageList({ messages, isStreaming }: MessageListProps) {
+export function MessageList({
+  messages,
+  isStreaming,
+  onSourcesOpen,
+}: MessageListProps) {
   return (
     <ol aria-label="Сообщения чата" className="flex flex-col gap-6">
       {messages.map((message, index) => {
@@ -50,7 +70,11 @@ export function MessageList({ messages, isStreaming }: MessageListProps) {
             {isWelcomeMessage ? (
               <WelcomeMessage />
             ) : (
-              <AssistantMessage message={message} isStreaming={isStreaming} />
+              <AssistantMessage
+                isStreaming={isStreaming}
+                message={message}
+                onSourcesOpen={onSourcesOpen}
+              />
             )}
           </li>
         );
@@ -62,9 +86,11 @@ export function MessageList({ messages, isStreaming }: MessageListProps) {
 function AssistantMessage({
   isStreaming,
   message,
+  onSourcesOpen,
 }: {
   isStreaming: boolean;
   message: ChatMessage;
+  onSourcesOpen: () => void;
 }) {
   return (
     <div className="space-y-3">
@@ -104,7 +130,11 @@ function AssistantMessage({
       {message.sources?.length ? (
         <div className="space-y-2">
           {message.sources.map((sources, index) => (
-            <SourcesBlock key={index} sources={sources} />
+            <SourcesBlock
+              key={index}
+              onOpen={onSourcesOpen}
+              sources={sources}
+            />
           ))}
         </div>
       ) : null}
@@ -133,34 +163,45 @@ function AlertBlock({ alert }: { alert: NonNullable<ChatMessage["alerts"]>[numbe
 }
 
 function SourcesBlock({
+  onOpen,
   sources,
 }: {
+  onOpen: () => void;
   sources: NonNullable<ChatMessage["sources"]>[number];
 }) {
   const confidenceText =
     typeof sources.confidence === "number"
       ? `${Math.round(sources.confidence * 100)}%`
-      : sources.confidence_label;
+      : formatConfidenceLabel(sources.confidence_label);
 
   return (
-    <details className="text-base leading-6 text-muted-foreground">
-      <summary className="cursor-pointer">
-        Источники{confidenceText ? ` · уверенность ${confidenceText}` : ""}
-      </summary>
-      <ul className="mt-2 space-y-1">
-        {sources.sources.map((source, index) => (
-          <li className="break-words" key={`${source.source}-${index}`}>
-            {source.url ? (
-              <Link className="underline" href={source.url}>
-                {source.title ?? source.source}
-              </Link>
-            ) : (
-              (source.title ?? source.source)
-            )}
-          </li>
-        ))}
-      </ul>
-    </details>
+    <div className="space-y-1 text-base leading-6 text-muted-foreground">
+      {confidenceText ? <p>Уверенность в ответе: {confidenceText}</p> : null}
+      {sources.sources.length ? (
+        <details
+          onToggle={(event) => {
+            if (event.currentTarget.open) {
+              onOpen();
+            }
+          }}
+        >
+          <summary className="cursor-pointer">Источники</summary>
+          <ul className="mt-2 space-y-1">
+            {sources.sources.map((source, index) => (
+              <li className="break-words" key={`${source.source}-${index}`}>
+                {source.url ? (
+                  <Link className="underline" href={source.url}>
+                    {source.title ?? source.source}
+                  </Link>
+                ) : (
+                  (source.title ?? source.source)
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </div>
   );
 }
 
