@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -30,13 +30,13 @@ export default function SettingsPage() {
   return (
     <main className="mx-auto w-full max-w-4xl px-5 py-8">
       <section className="max-w-2xl py-8">
-        <p className="text-sm font-semibold uppercase text-muted-foreground">
+        <p className="text-sm font-semibold uppercase leading-6 text-muted-foreground">
           Настройки
         </p>
-        <h1 className="mt-3 text-3xl font-semibold leading-tight">
+        <h1 className="mt-3 text-3xl font-semibold leading-6">
           Настройте Ай-Яй под себя.
         </h1>
-        <p className="mt-4 text-lg leading-8 text-muted-foreground">
+        <p className="mt-4 text-muted-foreground">
           Здесь появятся настройки профиля, доступности и важных контактов.
         </p>
         <Button

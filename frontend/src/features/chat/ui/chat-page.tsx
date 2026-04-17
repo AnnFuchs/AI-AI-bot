@@ -60,7 +60,7 @@ export function ChatPage() {
 
       <section className="relative z-10 bg-background pb-5 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-gradient-to-t before:from-background before:to-transparent">
         {error ? (
-          <p className="mb-3 text-base text-destructive" role="alert">
+          <p className="mb-3 text-base leading-6 text-destructive" role="alert">
             {error}
           </p>
         ) : null}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -43,7 +43,7 @@ export function OnboardingQuestionsForm() {
   return (
     <div className="flex min-h-[calc(100svh-3rem)] w-full max-w-sm flex-col min-[375px]:min-h-[calc(100svh-4rem)]">
       <form
-        className="flex flex-1 flex-col gap-7 min-[375px]:gap-8"
+        className="flex flex-1 flex-col gap-5 min-[375px]:gap-6"
         id="onboarding-questions-form"
         noValidate
         onSubmit={async (event) => {
@@ -79,6 +79,9 @@ export function OnboardingQuestionsForm() {
         }}
       >
         <fieldset>
+          <legend className="mb-2 min-[375px]:text-xl min-[375px]:leading-6">
+            У кого был инсульт?
+          </legend>
           <RadioGroup
             className="flex flex-col gap-3"
             disabled={isSubmitting}
@@ -89,18 +92,19 @@ export function OnboardingQuestionsForm() {
             }}
             value={strokeOwner}
           >
-            <label className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
+            <label className="flex min-w-0 cursor-pointer items-center gap-3 min-[375px]:text-xl min-[375px]:leading-6">
               <RadioGroupItem value="self" />
-              <span className="min-w-0">У меня был инсульт</span>
+              <span className="min-w-0">У меня</span>
             </label>
-            <label className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
+            <label className="flex min-w-0 cursor-pointer items-center gap-3 min-[375px]:text-xl min-[375px]:leading-6">
               <RadioGroupItem value="close-person" />
-              <span className="min-w-0">У моего близкого был инсульт</span>
+              <span className="min-w-0">У моего близкого</span>
             </label>
           </RadioGroup>
         </fieldset>
 
         <DateField
+          hint="Укажите дату рождения человека, перенесшего инсульт"
           id="birth-date"
           label="Дата рождения"
           disabled={isSubmitting}
@@ -112,7 +116,7 @@ export function OnboardingQuestionsForm() {
         />
 
         <fieldset>
-          <legend className="mb-3 text-lg leading-6 min-[375px]:text-xl">Пол</legend>
+          <legend className="mb-2 min-[375px]:text-xl min-[375px]:leading-6">Пол</legend>
           <RadioGroup
             className="flex flex-wrap gap-4"
             disabled={isSubmitting}
@@ -123,11 +127,11 @@ export function OnboardingQuestionsForm() {
             }}
             value={sex}
           >
-            <label className="flex items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
+            <label className="flex cursor-pointer items-center gap-3 min-[375px]:text-xl min-[375px]:leading-6">
               <RadioGroupItem value="male" />
               Муж
             </label>
-            <label className="flex items-center gap-3 text-lg leading-6 min-[375px]:text-xl">
+            <label className="flex cursor-pointer items-center gap-3 min-[375px]:text-xl min-[375px]:leading-6">
               <RadioGroupItem value="female" />
               Жен
             </label>
@@ -147,7 +151,7 @@ export function OnboardingQuestionsForm() {
         />
 
         <fieldset>
-          <legend className="mb-3 text-lg leading-6 min-[375px]:text-xl">Тип инсульта</legend>
+          <legend className="mb-2 min-[375px]:text-xl min-[375px]:leading-6">Тип инсульта</legend>
           <RadioGroup
             className="flex flex-col gap-3"
             disabled={isSubmitting}
@@ -160,7 +164,7 @@ export function OnboardingQuestionsForm() {
           >
             {strokeTypeOptions.map((option) => (
               <label
-                className="flex min-w-0 items-center gap-3 text-lg leading-6 min-[375px]:text-xl"
+                className="flex min-w-0 cursor-pointer items-center gap-3 min-[375px]:text-xl min-[375px]:leading-6"
                 key={option.value}
               >
                 <RadioGroupItem value={option.value} />
@@ -171,7 +175,10 @@ export function OnboardingQuestionsForm() {
         </fieldset>
 
         {error ? (
-          <p className="text-lg leading-6 text-destructive" role="alert">
+          <p
+            className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive"
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
@@ -193,12 +200,12 @@ export function OnboardingQuestionsForm() {
 function DateField({ disabled, hint, id, label, onChange, value }: DateFieldProps) {
   return (
     <section className="flex flex-col gap-2">
-      <label className="text-lg leading-6 min-[375px]:text-xl" htmlFor={id}>
+      <label className="min-[375px]:text-xl min-[375px]:leading-6" htmlFor={id}>
         {label}
       </label>
       <Input
         autoComplete={id === "birth-date" ? "bday" : "off"}
-        className="w-full max-w-[220px] text-lg min-[375px]:text-xl"
+        className="w-full max-w-[220px] min-[375px]:text-xl min-[375px]:leading-6"
         disabled={disabled}
         id={id}
         onChange={(event) => {
@@ -208,7 +215,7 @@ function DateField({ disabled, hint, id, label, onChange, value }: DateFieldProp
         value={value}
       />
       {hint ? (
-        <p className="max-w-[280px] text-base leading-6 text-muted-foreground min-[375px]:text-lg">
+        <p className="max-w-[280px] text-base leading-6 text-muted-foreground min-[375px]:text-lg min-[375px]:leading-6">
           {hint}
         </p>
       ) : null}

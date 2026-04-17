@@ -153,9 +153,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       onSubmit={onSubmit}
     >
       <div>
-        <label htmlFor={`${mode}-login`} className="text-lg min-[375px]:text-xl">Телефон</label>
+        <label htmlFor={`${mode}-login`} className="min-[375px]:text-xl min-[375px]:leading-6">Телефон</label>
         <Input
-            className="mt-2 text-lg min-[375px]:text-xl"
+            className="mt-2 min-[375px]:text-xl min-[375px]:leading-6"
             autoComplete="tel"
             disabled={isSubmitting}
             id={`${mode}-login`}
@@ -179,9 +179,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       </div>
 
       <div>
-        <label htmlFor={`${mode}-password`} className="text-lg min-[375px]:text-xl">Пароль</label>
+        <label htmlFor={`${mode}-password`} className="min-[375px]:text-xl min-[375px]:leading-6">Пароль</label>
         <Input
-            className="mt-2 text-lg min-[375px]:text-xl"
+            className="mt-2 min-[375px]:text-xl min-[375px]:leading-6"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             disabled={isSubmitting}
             id={`${mode}-password`}
@@ -197,14 +197,14 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {formError ? (
         <p
-          className="rounded-xl bg-destructive/10 px-4 py-3 text-lg leading-6 text-destructive"
+          className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive"
           role="alert"
         >
           {formError}
         </p>
       ) : null}
 
-      <Button disabled={isSubmitting} type="submit" className="text-lg leading-6 min-[375px]:text-xl">
+      <Button disabled={isSubmitting} type="submit" className="min-[375px]:text-xl min-[375px]:leading-6">
         {submitText}
       </Button>
     </form>

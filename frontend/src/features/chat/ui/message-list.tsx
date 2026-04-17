@@ -49,9 +49,9 @@ export function MessageList({
         if (message.role === "user") {
           return (
             <li className="ml-auto flex max-w-[85%] flex-col" key={message.id}>
-              <p className="mb-2 text-sm font-semibold text-muted-foreground">Вы:</p>
+              <p className="mb-2 text-sm font-semibold leading-6 text-muted-foreground">Вы:</p>
               <div className="rounded-xl bg-black/5 px-4 py-3 text-foreground">
-                <p className="whitespace-pre-wrap break-words text-lg leading-6">
+                <p className="whitespace-pre-wrap break-words">
                   {message.content}
                 </p>
               </div>
@@ -64,7 +64,7 @@ export function MessageList({
             className="w-full text-foreground sm:mr-auto sm:max-w-[88%]"
             key={message.id}
           >
-            <p className="mb-2 text-sm font-semibold text-muted-foreground">
+            <p className="mb-2 text-sm font-semibold leading-6 text-muted-foreground">
               Ай-Яй:
             </p>
             {isWelcomeMessage ? (
@@ -94,7 +94,7 @@ function AssistantMessage({
 }) {
   return (
     <div className="space-y-3">
-      <p className="whitespace-pre-wrap break-words text-lg leading-6">
+      <p className="whitespace-pre-wrap break-words">
         {message.content || (isStreaming ? "Думаю..." : "")}
       </p>
       {message.alerts?.length ? (
@@ -109,7 +109,7 @@ function AssistantMessage({
           {message.actions.map((action) => (
             <Button
               asChild
-              className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+              className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
               key={action.id}
               variant="chat"
             >
@@ -144,7 +144,7 @@ function AssistantMessage({
 
 function AlertBlock({ alert }: { alert: NonNullable<ChatMessage["alerts"]>[number] }) {
   return (
-    <section className="rounded-xl bg-destructive/10 px-4 py-3 text-lg leading-6 text-destructive">
+    <section className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive">
       {alert.message ? <p className="font-semibold">{alert.message}</p> : null}
       {alert.red_flags.length ? (
         <ul className="mt-2 space-y-2">
@@ -212,7 +212,7 @@ function SourcesBlock({
 
 function WelcomeMessage() {
   return (
-    <div className="space-y-4 text-lg leading-6">
+    <div className="space-y-4">
       <p>
         Еще раз здравствуйте! Меня зовут Ай-Яй и я ваш помощник в жизни после
         инсульта.
@@ -226,7 +226,7 @@ function WelcomeMessage() {
       <div className="flex flex-col items-start gap-2">
         <Button
           asChild
-          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
           variant="chat"
         >
           <Link href="/learn/articles/when-to-see-a-doctor">
@@ -235,14 +235,14 @@ function WelcomeMessage() {
         </Button>
         <Button
           asChild
-          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
           variant="chat"
         >
           <Link href="/learn/articles/what-is-stroke">Что такое инсульт?</Link>
         </Button>
         <Button
           asChild
-          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base min-[375px]:h-12 min-[375px]:text-lg"
+          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
           variant="chat"
         >
           <Link href="/learn/articles/what-to-do-after-a-stroke">
