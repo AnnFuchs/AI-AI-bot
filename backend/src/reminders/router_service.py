@@ -92,7 +92,7 @@ async def remove_push_subscription(
 
 def get_decoded_vapid_public_key() -> str:
     """Return raw EC public key as base64url for applicationServerKey."""
-    pem = base64.b64decode(settings.vapid_public_key.get_secret_value())
+    pem = base64.b64decode(settings.VAPID_PUBLIC_KEY.get_secret_value())
     public_key = load_pem_public_key(pem)
     raw_bytes = public_key.public_bytes(
         Encoding.X962,

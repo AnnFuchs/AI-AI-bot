@@ -37,9 +37,9 @@ async def _send_push(
                 },
                 data=data,
                 vapid_private_key=base64.b64decode(
-                    settings.vapid_private_key.get_secret_value(),
+                    settings.VAPID_PRIVATE_KEY.get_secret_value(),
                 ).decode('utf-8'),
-                vapid_claims={'sub': settings.vapid_claims_email},
+                vapid_claims={'sub': settings.VAPID_CLAIMS_EMAIL},
             ),
         )
     except WebPushException as e:

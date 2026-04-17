@@ -39,7 +39,7 @@ async def chat_stream(
             async with httpx.AsyncClient(timeout=60) as client:
                 async with client.stream(
                     'POST',
-                    f'{settings.ai_layer_url}/chat/stream',
+                    f'{settings.AI_LAYER_URL}/chat/stream',
                     json=ai_payload,
                 ) as response:
                     async for line in response.aiter_lines():

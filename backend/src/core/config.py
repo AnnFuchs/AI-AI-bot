@@ -10,16 +10,16 @@ BASE_DIR = Path(__file__).parent.parent
 class Settings(BaseSettings):
     """App settings."""
 
-    app_title: str = 'AI-AI Stroke buddy.'
-    app_description: str = 'Poststroke AI Assistant.'
+    APP_TITLE: str = 'AI-AI Stroke buddy.'
+    APP_DESCRIPTION: str = 'Poststroke AI Assistant.'
 
-    postgres_user: str
-    postgres_password: SecretStr
-    postgres_db: str
-    postgres_server: str
-    postgres_port: int
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: SecretStr
+    POSTGRES_DB: str
+    POSTGRES_SERVER: str
+    POSTGRES_PORT: int
 
-    @field_validator('postgres_port')
+    @field_validator('POSTGRES_PORT')
     @classmethod
     def check_port(cls, value: int) -> int:
         """Port validator."""
@@ -31,31 +31,31 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         """Db URL maker."""
         return (
-            f'postgresql+asyncpg://{self.postgres_user}:'
-            f'{self.postgres_password.get_secret_value()}'
-            f'@{self.postgres_server}:'
-            f'{self.postgres_port}/{self.postgres_db}'
+            f'postgresql+asyncpg://{self.POSTGRES_USER}:'
+            f'{self.POSTGRES_PASSWORD.get_secret_value()}'
+            f'@{self.POSTGRES_SERVER}:'
+            f'{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
         )
 
-    secret_key: SecretStr
-    algorithm: str
+    SECRET_KEY: SecretStr
+    ALGORITHM: str
 
     @property
     def jwt_auth_data(self) -> dict:
         """Generation of data for jwt."""
         return {
-            'secret_key': self.secret_key.get_secret_value(),
-            'algorithm': self.algorithm,
+            'SECRET_KEY': self.SECRET_KEY.get_secret_value(),
+            'ALGORITHM': self.ALGORITHM,
         }
 
-    first_superuser_phone: PhoneNumber
-    first_superuser_password: SecretStr
+    FIRST_SUPERUSER_PHONE: PhoneNumber
+    FIRST_SUPERUSER_PASSWORD: SecretStr
 
-    ai_layer_url: str = 'http://localhost:8001'
+    AI_LAYER_URL: str = 'http://localhost:8001'
 
-    vapid_private_key: SecretStr
-    vapid_public_key: SecretStr
-    vapid_claims_email: str
+    VAPID_PRIVATE_KEY: SecretStr
+    VAPID_PUBLIC_KEY: SecretStr
+    VAPID_CLAIMS_EMAIL: str
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR.parent / 'infra' / '.env',
