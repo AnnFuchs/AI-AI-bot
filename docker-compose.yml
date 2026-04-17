@@ -7,8 +7,10 @@ services:
     container_name: aiai_nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - frontend
       - backend
@@ -24,22 +26,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data/pgdata
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 30s
       timeout: 10s
       retries: 5
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:v1.7.4
+    image: qdrant/qdrant:latest
     container_name: aiai_qdrant
     volumes:
       - qdrant_data:/qdrant/storage
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
 
   redis:
@@ -69,10 +66,8 @@ services:
       BACKEND_BASE_URL: http://backend:8000
       APP_ENV: production
     depends_on:
-      qdrant:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - qdrant
+      - redis
     restart: unless-stopped
 
   backend:
@@ -98,7 +93,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_BASE_URL: http://<YOUR_VM_IP>
+        NEXT_PUBLIC_API_BASE_URL: https://ai-ai.sytes.net/api/v1
         NEXT_PUBLIC_API_INCLUDE_CREDENTIALS: "true"
     container_name: aiai_frontend
     depends_on:
