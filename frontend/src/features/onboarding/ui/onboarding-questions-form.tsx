@@ -185,7 +185,7 @@ export function OnboardingQuestionsForm() {
       </form>
 
       <Button
-        className="mt-6 w-full min-[375px]:mt-8"
+        className="mt-8 w-full"
         disabled={isSubmitting}
         form="onboarding-questions-form"
         type="submit"

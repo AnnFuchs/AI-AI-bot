@@ -19,7 +19,7 @@ export default function OnboardingPage() {
           Начнем с короткой настройки. Ответьте, пожалуйста, на вопросы.
         </p>
 
-      <Button asChild className="h-10 w-fit max-w-full px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6">
+      <Button asChild className="w-fit max-w-full px-4">
         <Link href="/onboarding/questions">
           Ответить на вопросы
           <ArrowRightIcon aria-hidden="true" />

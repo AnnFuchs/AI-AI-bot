@@ -11,7 +11,7 @@ export default function LoginPage() {
         <p className="text-center text-muted-foreground">
           Еще нет аккаунта?
         </p>
-        <Button asChild className="w-full text-muted-foreground min-[375px]:text-xl min-[375px]:leading-6" variant="outline">
+        <Button asChild className="w-full text-muted-foreground" variant="outline">
           <Link href="/register">Зарегистрироваться</Link>
         </Button>
       </div>

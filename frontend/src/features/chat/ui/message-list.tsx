@@ -109,7 +109,7 @@ function AssistantMessage({
           {message.actions.map((action) => (
             <Button
               asChild
-              className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
+              className="max-w-full justify-start overflow-hidden px-4"
               key={action.id}
               variant="chat"
             >
@@ -226,27 +226,27 @@ function WelcomeMessage() {
       <div className="flex flex-col items-start gap-2">
         <Button
           asChild
-          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
+          className="max-w-full justify-start overflow-hidden px-4"
           variant="chat"
         >
-          <Link href="/learn/articles/when-to-see-a-doctor">
-            Когда стоит обратиться к врачу?
+          <Link href="/learn/articles/why-stroke-happens">
+            Это лечится?
           </Link>
         </Button>
         <Button
           asChild
-          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
+          className="max-w-full justify-start overflow-hidden px-4"
           variant="chat"
         >
           <Link href="/learn/articles/what-is-stroke">Что такое инсульт?</Link>
         </Button>
         <Button
           asChild
-          className="h-10 max-w-full justify-start overflow-hidden px-4 text-base leading-6 min-[375px]:h-12 min-[375px]:text-lg min-[375px]:leading-6"
+          className="max-w-full justify-start overflow-hidden px-4"
           variant="chat"
         >
-          <Link href="/learn/articles/what-to-do-after-a-stroke">
-            Инсульт – что делать дальше?
+          <Link href="/learn/articles/can-stroke-happen-again">
+            Инсульт может повториться?
           </Link>
         </Button>
       </div>

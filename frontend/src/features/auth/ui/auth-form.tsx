@@ -204,7 +204,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         </p>
       ) : null}
 
-      <Button disabled={isSubmitting} type="submit" className="min-[375px]:text-xl min-[375px]:leading-6">
+      <Button disabled={isSubmitting} type="submit">
         {submitText}
       </Button>
     </form>

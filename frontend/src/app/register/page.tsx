@@ -11,7 +11,7 @@ export default function RegisterPage() {
         <p className="text-center text-muted-foreground">
           Уже зарегистрированы?
         </p>
-        <Button asChild className="w-full text-muted-foreground min-[375px]:text-xl min-[375px]:leading-6" variant="outline">
+        <Button asChild className="w-full text-muted-foreground" variant="outline">
           <Link href="/login">Войти</Link>
         </Button>
       </div>
