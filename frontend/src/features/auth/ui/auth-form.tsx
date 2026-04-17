@@ -79,36 +79,50 @@ function isValidRegistrationPassword(password: string) {
   return /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password);
 }
 
+function getPasswordValidationMessage(mode: AuthFormProps["mode"]) {
+  return mode === "register"
+    ? "Пароль должен быть не короче 8 символов и содержать заглавную букву, строчную букву и цифру."
+    : "Введите пароль.";
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const form = useForm<AuthFormValues>({
     defaultValues: {
       phone: "",
       password: "",
     },
   });
-  const phoneField = form.register("phone", { required: true });
+  const phoneField = form.register("phone", {
+    validate: (value) =>
+      Boolean(normalizePhoneForApi(value)) || "Введите номер телефона полностью.",
+  });
+  const passwordField = form.register("password", {
+    validate: (value) => {
+      if (!value) {
+        return "Введите пароль.";
+      }
+
+      if (mode === "register" && !isValidRegistrationPassword(value)) {
+        return getPasswordValidationMessage(mode);
+      }
+
+      return true;
+    },
+  });
   const phoneValue = form.watch("phone");
   const isSubmitting = form.formState.isSubmitting;
   const submitText = mode === "login" ? "Войти" : "Зарегистрироваться";
+  const formError =
+    form.formState.errors.phone?.message ??
+    form.formState.errors.password?.message ??
+    apiError;
 
   const onSubmit = form.handleSubmit(async (values) => {
-    setError(null);
+    setApiError(null);
 
     const phone = normalizePhoneForApi(values.phone);
-
-    if (!phone) {
-      setError("Введите номер телефона полностью.");
-      return;
-    }
-
-    if (mode === "register" && !isValidRegistrationPassword(values.password)) {
-      setError(
-        "Пароль должен быть не короче 8 символов и содержать заглавную букву, строчную букву и цифру.",
-      );
-      return;
-    }
 
     try {
       if (mode === "login") {
@@ -125,7 +139,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       router.push(mode === "register" ? "/onboarding" : "/");
     } catch (caughtError) {
-      setError(
+      setApiError(
         caughtError instanceof Error
           ? caughtError.message
           : "Не получилось выполнить запрос. Попробуйте еще раз.",
@@ -147,11 +161,13 @@ export function AuthForm({ mode }: AuthFormProps) {
             id={`${mode}-login`}
             inputMode="tel"
             maxLength={18}
+            aria-invalid={Boolean(form.formState.errors.phone)}
             onChange={(event) => {
               form.setValue("phone", formatPhoneInput(event.currentTarget.value), {
                 shouldDirty: true,
                 shouldValidate: true,
               });
+              setApiError(null);
             }}
             placeholder="+7 (999) 999-99-99"
             type="tel"
@@ -170,11 +186,23 @@ export function AuthForm({ mode }: AuthFormProps) {
             disabled={isSubmitting}
             id={`${mode}-password`}
             type="password"
-            {...form.register("password", { required: true })}
+            aria-invalid={Boolean(form.formState.errors.password)}
+            {...passwordField}
+            onChange={(event) => {
+              passwordField.onChange(event);
+              setApiError(null);
+            }}
         />
       </div>
 
-      {error ? <p role="alert">{error}</p> : null}
+      {formError ? (
+        <p
+          className="rounded-xl bg-destructive/10 px-4 py-3 text-lg leading-6 text-destructive"
+          role="alert"
+        >
+          {formError}
+        </p>
+      ) : null}
 
       <Button disabled={isSubmitting} type="submit" className="text-lg leading-6 min-[375px]:text-xl">
         {submitText}

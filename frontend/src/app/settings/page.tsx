@@ -1,11 +1,54 @@
-import { PlaceholderPage } from "@/shared/layout/placeholder-page";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { logout } from "@/features/auth/api/auth-service";
+import { clearAuthToken, getRefreshToken } from "@/features/auth/lib/token-storage";
+import { Button } from "@/shared/ui/button";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    const refreshToken = getRefreshToken();
+
+    setIsLoggingOut(true);
+
+    try {
+      if (refreshToken) {
+        await logout(refreshToken);
+      }
+    } finally {
+      clearAuthToken();
+      router.replace("/login");
+      router.refresh();
+    }
+  }
+
   return (
-    <PlaceholderPage
-      body="Здесь появятся настройки профиля, доступности и важных контактов."
-      eyebrow="Настройки"
-      title="Настройте Ай-Яй под себя."
-    />
+    <main className="mx-auto w-full max-w-4xl px-5 py-8">
+      <section className="max-w-2xl py-8">
+        <p className="text-sm font-semibold uppercase text-muted-foreground">
+          Настройки
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold leading-tight">
+          Настройте Ай-Яй под себя.
+        </h1>
+        <p className="mt-4 text-lg leading-8 text-muted-foreground">
+          Здесь появятся настройки профиля, доступности и важных контактов.
+        </p>
+        <Button
+          className="mt-8"
+          disabled={isLoggingOut}
+          onClick={handleLogout}
+          type="button"
+          variant="outline"
+        >
+          Выйти
+        </Button>
+      </section>
+    </main>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import {usePathname} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
+import {useEffect, useState} from "react";
 
+import {getAccessToken} from "@/features/auth/lib/token-storage";
 import {cn} from "@/shared/lib/utils";
 import {BookIcon} from "@/shared/ui/icons/book-icon";
 import {ChatIcon} from "@/shared/ui/icons/chat-icon";
@@ -16,16 +18,42 @@ const navItems = [
 ];
 
 export function AppShell({children}: { children: React.ReactNode }) {
+    const router = useRouter();
     const pathname = usePathname();
+    const [isAuthReady, setIsAuthReady] = useState(false);
     const isChatPage = pathname === "/";
-    const isAuthPage =
+    const isPublicAuthPage =
         pathname === "/login" ||
-        pathname === "/register" ||
+        pathname === "/register";
+    const shouldHideNavigation =
+        isPublicAuthPage ||
         pathname.startsWith("/onboarding");
+
+    useEffect(() => {
+        setIsAuthReady(false);
+
+        const hasAccessToken = Boolean(getAccessToken());
+
+        if (!hasAccessToken && !isPublicAuthPage) {
+            router.replace("/login");
+            return;
+        }
+
+        if (hasAccessToken && isPublicAuthPage) {
+            router.replace("/");
+            return;
+        }
+
+        setIsAuthReady(true);
+    }, [isPublicAuthPage, pathname, router]);
+
+    if (!isAuthReady) {
+        return <div className="min-h-dvh bg-background" />;
+    }
 
     return (
         <div className="min-h-dvh bg-background text-foreground">
-            {!isAuthPage ? (
+            {!shouldHideNavigation ? (
                 <header className={cn(
                     "sticky top-0 z-20 bg-background p-1.5 min-[375px]:p-2",
                     !isChatPage &&
