@@ -16,8 +16,8 @@ class SourceCreate(BaseModel):
 
     source_type: SourceType
     source_name: str = Field(max_length=SOURCE_NAME_LEN)
-    source_date: int | None = Field(gt=SOURCE_YEAR_START)
-    source_url: str | None = Field(max_length=SOURCE_URL_LEN)
+    source_date: int | None = Field(default=None, gt=SOURCE_YEAR_START)
+    source_url: str | None = Field(default=None, max_length=SOURCE_URL_LEN)
     source_file_name: str = Field(max_length=SOURCE_NAME_LEN)
 
     @field_validator('source_date')

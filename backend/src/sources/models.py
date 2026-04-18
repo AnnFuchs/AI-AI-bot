@@ -28,8 +28,10 @@ class Source(CommonMixin, Base):
     )
     source_date: Mapped[int] = mapped_column(
         Integer,
+        nullable=True,
     )
     source_url: Mapped[str] = mapped_column(
         String(SOURCE_URL_LEN),
         unique=True,
+        nullable=True,
     )

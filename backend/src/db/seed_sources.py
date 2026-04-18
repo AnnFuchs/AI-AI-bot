@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.logger import logger
@@ -24,3 +25,5 @@ async def seed_sources(session: AsyncSession) -> None:
             logger.info('Source "%s" created successfully.', file_name)
         except DuplicateInfoError as e:
             logger.info('Source "%s" already exists: %s', file_name, e)
+        except ValidationError as e:
+            logger.error('Source "%s" schema error: %s', file_name, e)
