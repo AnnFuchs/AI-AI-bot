@@ -131,7 +131,7 @@ class RAGService:
                     "id": point.id,
                     "score": avg_cosine(point.id),
                     "content": point.payload.get("parent_content", point.payload.get("content", "")),
-                    "source": point.payload.get("metadata", {}).get("source", "")
+                    "source": point.payload.get("source", point.payload.get("metadata", {}).get("source", ""))
                 } for point in filtered_points
             ]
 
