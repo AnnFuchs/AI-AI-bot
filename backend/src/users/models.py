@@ -21,7 +21,7 @@ from src.db.base import Base, CommonMixin
 
 if TYPE_CHECKING:
     from src.diary.models import DiaryEntry
-    from src.reminders.models import Reminder
+    from src.reminders.models import PushSubscription, Reminder
 
 
 class User(CommonMixin, Base):
@@ -96,11 +96,6 @@ class User(CommonMixin, Base):
         cascade='all, delete-orphan',
         lazy='noload',
     )
-    reminders: Mapped[list['Reminder']] = relationship(
-        back_populates='user',
-        cascade='all, delete-orphan',
-        lazy='noload',
-    )
     known_symptoms: Mapped[list[str]] = mapped_column(
         JSON,
         default=list,
@@ -109,4 +104,22 @@ class User(CommonMixin, Base):
     doctor_id: Mapped[str] = mapped_column(
         String(DOC_ID_LEN),
         nullable=True,
+    )
+    reminders: Mapped[list['Reminder']] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan',
+        lazy='noload',
+    )
+    push_subscriptions: Mapped[list['PushSubscription']] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan',
+        lazy='noload',
+    )
+    daily_checkin_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+    timezone: Mapped[str] = mapped_column(
+        String(50), default='UTC', nullable=False,
     )

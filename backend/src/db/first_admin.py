@@ -9,8 +9,8 @@ from src.users.service import user_service
 
 async def create_first_admin(
     session: AsyncSession,
-    phone: str = settings.first_superuser_phone,
-    password: str = settings.first_superuser_password.get_secret_value(),
+    phone: str = settings.FIRST_SUPERUSER_PHONE,
+    password: str = settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
 ) -> None:
     """Create the first superuser on application startup."""
     try:

@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import get_current_user
-from src.chat.commands import handle_backend_commands
+from src.chat.commands import get_sources, handle_backend_commands
 from src.chat.context import build_user_context
 from src.chat.schemas import ChatRequest
 from src.core.config import settings
@@ -61,6 +61,21 @@ async def chat_stream(
                         if event_type == 'commands':
                             await handle_backend_commands(
                                 event.get('payload', []), user, db,
+                            )
+                            continue
+                        if event_type == 'sources':
+                            sources = await get_sources(
+                                event.get('payload', {}), db,
+                            )
+                            yield (
+                                f'data: {
+                                    json.dumps(
+                                        {
+                                            'type': 'sources',
+                                            'payload': sources
+                                        }, ensure_ascii=False
+                                    )
+                                }\n\n'
                             )
                             continue
 

@@ -10,6 +10,7 @@ from src.users.errors import DuplicateInfoError, InactiveUserError
 from src.users.models import User
 from src.users.schemas import (
     AssignDoctorUpdate,
+    TimezoneUpdate,
     UserCreate,
     UserInfo,
     UserUpdate,
@@ -106,3 +107,19 @@ async def deactivate_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
+
+
+@router.patch(
+    '/me/timezone',
+    response_model=UserInfo,
+    summary='Sync device timezone',
+)
+async def sync_timezone(
+    tz_data: TimezoneUpdate,
+    session: SessionDep,
+    current_user: User = Depends(get_current_user),
+) -> UserInfo:
+    """Call on app load to keep timezone in sync."""
+    return await user_service.update(
+        current_user, UserUpdate(timezone=tz_data.timezone), session,
+    )

@@ -8,6 +8,7 @@ from src.core.logger import logger
 from src.diary.schemas import DiaryEntryCreate
 from src.diary.service import diary_service
 from src.reminders.models import Reminder
+from src.sources.models import Source
 from src.users.models import User
 
 
@@ -81,3 +82,26 @@ async def _save_diary_entry(
     )
     await diary_service.create_entry(data, user.id, db)
     logger.info('Diary entry saved for user %s: %s', user.id, entry_type)
+
+
+async def get_sources(payload: dict, db: AsyncSession) -> dict:
+    """Get sources for info."""
+    confidence_label = payload.get('confidence_label')
+    sources_raw = {s['source'] for s in payload.get('sources', [])}
+    sources_formatted = []
+
+    for file_name in sources_raw:
+        db_source: Source | None = await db.scalar(
+            select(Source).where(Source.source_file_name == file_name),
+        )
+        if db_source is None:
+            logger.warning('Source not found in DB: %s', file_name)
+            continue
+        sources_formatted.append(
+            f'{db_source.source_type} {db_source.source_name} '
+            f'{db_source.source_date} {db_source.source_url} ',
+        )
+
+    return {
+        'confidence_label': confidence_label, 'sources': sources_formatted,
+    }
