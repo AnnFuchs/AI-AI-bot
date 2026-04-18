@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.core.config import settings
 from src.core.router import main_router
 from src.db.first_admin import create_first_admin
+from src.db.seed_sources import seed_sources
 from src.db.session import AsyncSessionLocal
 from src.reminders.scheduler import start_scheduler, stop_scheduler
 
@@ -16,6 +17,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Create first admin on application startup."""
     async with AsyncSessionLocal() as session:
         await create_first_admin(session=session)
+        await seed_sources(session=session)
 
     start_scheduler()
     yield
@@ -23,8 +25,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title=settings.app_title,
-    description=settings.app_description,
+    title=settings.APP_TITLE,
+    description=settings.APP_DESCRIPTION,
     lifespan=lifespan,
 )
 
