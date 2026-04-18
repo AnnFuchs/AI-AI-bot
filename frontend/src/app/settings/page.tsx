@@ -30,15 +30,9 @@ export default function SettingsPage() {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 pb-8 pt-3 min-[375px]:px-5">
       <section className="max-w-2xl">
-        <p className="text-sm font-semibold uppercase leading-6 text-muted-foreground">
-          Настройки
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold leading-6">
-          Настройте Ай-Яй под себя.
-        </h1>
-        <p className="mt-4">
-          Здесь появятся настройки профиля, доступности и важных контактов.
-        </p>
+        <p className="text-sm font-semibold uppercase leading-6 text-muted-foreground">Настройки</p>
+        <h1 className="mt-3 text-3xl font-semibold leading-6">Настройте Ай-Яй под себя.</h1>
+        <p className="mt-4">Здесь появятся настройки профиля, доступности и важных контактов.</p>
         <Button
           className="mt-8"
           disabled={isLoggingOut}

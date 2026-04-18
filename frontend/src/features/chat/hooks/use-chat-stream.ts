@@ -37,10 +37,7 @@ function appendAssistantContent(message: ChatMessage, content: string): ChatMess
   };
 }
 
-function appendAssistantAction(
-  message: ChatMessage,
-  action: Omit<ChatAction, "id">,
-): ChatMessage {
+function appendAssistantAction(message: ChatMessage, action: Omit<ChatAction, "id">): ChatMessage {
   const actions = message.actions ?? [];
   const shouldAddStrokeInfoAction = !actions.some(
     (currentAction) => currentAction.href === STROKE_INFO_ACTION.href,
@@ -58,9 +55,7 @@ function appendAssistantAction(
 
 export function useChatStream() {
   const sessionIdRef = useRef(createId());
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    createMessage("assistant", "welcome"),
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([createMessage("assistant", "welcome")]);
   const [status, setStatus] = useState<StreamStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -70,10 +65,7 @@ export function useChatStream() {
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
-            ? appendAssistantContent(
-                message,
-                event.type === "token" ? event.token : event.text,
-              )
+            ? appendAssistantContent(message, event.type === "token" ? event.token : event.text)
             : message,
         ),
       );

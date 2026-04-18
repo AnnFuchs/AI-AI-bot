@@ -4,13 +4,10 @@
       <p className="mb-3 text-sm font-semibold uppercase leading-6 text-muted-foreground">
         Нет сети
       </p>
-      <h1 className="text-3xl font-semibold leading-6 text-foreground">
-        Сейчас вы не в сети.
-      </h1>
+      <h1 className="text-3xl font-semibold leading-6 text-foreground">Сейчас вы не в сети.</h1>
       <p className="mt-4 text-muted-foreground">
-        Ай-Яю нужно подключение для чата и обновлений по уходу. Сохраненные
-        страницы можно будет открыть здесь, когда стратегия кеширования PWA
-        станет шире.
+        Ай-Яю нужно подключение для чата и обновлений по уходу. Сохраненные страницы можно будет
+        открыть здесь, когда стратегия кеширования PWA станет шире.
       </p>
     </main>
   );

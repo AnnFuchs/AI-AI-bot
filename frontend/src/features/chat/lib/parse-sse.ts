@@ -157,8 +157,7 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
       return {
         type: "token",
         token:
-          readString(eventPayload ?? payloadObject, ["token", "content", "delta", "text"]) ??
-          "",
+          readString(eventPayload ?? payloadObject, ["token", "content", "delta", "text"]) ?? "",
       };
     }
 
@@ -197,9 +196,7 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
       return {
         type: "button",
         button: {
-          label:
-            readString(buttonPayload, ["label", "title", "text"]) ??
-            "Открыть памятку",
+          label: readString(buttonPayload, ["label", "title", "text"]) ?? "Открыть памятку",
           href: readString(buttonPayload, ["href", "url", "link"]) ?? "/learn",
         },
       };
@@ -238,10 +235,7 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
       type: "sources",
       sources: {
         confidence: readNumber(eventPayload, ["confidence"]),
-        confidence_label: readString(eventPayload, [
-          "confidence_label",
-          "confidenceLabel",
-        ]),
+        confidence_label: readString(eventPayload, ["confidence_label", "confidenceLabel"]),
         sources,
         used_rag: readBoolean(eventPayload, ["used_rag", "usedRag"]),
       },
@@ -264,8 +258,7 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
       return {
         type: "error",
         message:
-          readString(payloadObject, ["message", "detail"]) ??
-          "Поток чата завершился с ошибкой.",
+          readString(payloadObject, ["message", "detail"]) ?? "Поток чата завершился с ошибкой.",
       };
     }
 

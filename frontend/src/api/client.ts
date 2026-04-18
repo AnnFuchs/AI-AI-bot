@@ -65,10 +65,7 @@ function createHeaders(
 }
 
 export const apiClient = {
-  async request<TResponse, TBody = unknown>(
-    path: string,
-    options: ApiRequestOptions<TBody> = {},
-  ) {
+  async request<TResponse, TBody = unknown>(path: string, options: ApiRequestOptions<TBody> = {}) {
     if (USE_MOCK_API) {
       return mockAdapter.request<TResponse, TBody>(path, options);
     }

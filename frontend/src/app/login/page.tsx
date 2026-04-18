@@ -8,9 +8,7 @@ export default function LoginPage() {
       <AuthForm mode="login" />
       <div className="mt-10 flex w-full max-w-[300px] flex-col gap-3 min-[375px]:mt-12 min-[375px]:gap-4">
         <div className="h-px w-full bg-border" />
-        <p className="text-center text-muted-foreground">
-          Еще нет аккаунта?
-        </p>
+        <p className="text-center text-muted-foreground">Еще нет аккаунта?</p>
         <Button asChild className="w-full text-muted-foreground" variant="outline">
           <Link href="/register">Зарегистрироваться</Link>
         </Button>

@@ -175,10 +175,7 @@ export function OnboardingQuestionsForm() {
         </fieldset>
 
         {error ? (
-          <p
-            className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive"
-            role="alert"
-          >
+          <p className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive" role="alert">
             {error}
           </p>
         ) : null}
