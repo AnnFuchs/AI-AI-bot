@@ -8,19 +8,14 @@ const mascotImageSrc = "/images/ai-yai-mascot.png";
 export default function OnboardingPage() {
   return (
     <main
-      className="min-h-[100svh] w-full overflow-hidden bg-no-repeat"
+      className="min-h-[100svh] w-full overflow-hidden bg-no-repeat lg:flex lg:items-center lg:justify-center"
       style={{
         backgroundImage: `url(${mascotImageSrc})`,
         backgroundPosition: "right bottom",
         backgroundSize: "clamp(220px, 92vw, 420px) auto",
       }}
     >
-      <section
-        className="flex min-h-[100svh] max-w-4xl flex-col gap-5 px-4 pt-6 min-[375px]:px-5 min-[375px]:pt-8 sm:p-8"
-        style={{
-          paddingBottom: "clamp(17rem, 114vw, 32rem)",
-        }}
-      >
+      <section className="mx-auto flex min-h-[100svh] max-w-4xl flex-col gap-5 px-4 pb-[clamp(17rem,114vw,32rem)] pt-6 min-[375px]:px-5 min-[375px]:pt-8 sm:px-8 sm:pt-8 lg:min-h-0 lg:max-w-xl lg:p-8">
         <p>
           Здравствуйте! Меня зовут Ай-Яй.
           <br />Я ваш помощник в жизни после инсульта.

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { ArrowRightIcon } from "@/shared/ui/icons/arrow-right-icon";
 import { Input } from "@/shared/ui/input";
@@ -22,6 +23,7 @@ function getRoleFromStrokeOwner(strokeOwner: string): Role {
 }
 
 type DateFieldProps = {
+  className?: string;
   id: string;
   label: string;
   hint?: string;
@@ -41,9 +43,9 @@ export function OnboardingQuestionsForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   return (
-    <div className="flex min-h-[calc(100svh-3rem)] w-full max-w-sm flex-col min-[375px]:min-h-[calc(100svh-4rem)]">
+    <div className="flex min-h-[calc(100svh-3rem)] w-full max-w-sm flex-col min-[375px]:min-h-[calc(100svh-4rem)] lg:min-h-0 lg:max-w-3xl">
       <form
-        className="flex flex-1 flex-col gap-5 min-[375px]:gap-6"
+        className="flex flex-1 flex-col gap-5 min-[375px]:gap-6 lg:grid lg:grid-cols-2 lg:gap-x-12 lg:gap-y-8"
         id="onboarding-questions-form"
         noValidate
         onSubmit={async (event) => {
@@ -78,12 +80,12 @@ export function OnboardingQuestionsForm() {
           }
         }}
       >
-        <fieldset>
+        <fieldset className="lg:col-span-2 lg:mb-6">
           <legend className="mb-2 min-[375px]:text-xl min-[375px]:leading-6">
             У кого был инсульт?
           </legend>
           <RadioGroup
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-3 lg:flex-row lg:gap-8"
             disabled={isSubmitting}
             name="stroke-owner"
             onValueChange={(value) => {
@@ -104,6 +106,7 @@ export function OnboardingQuestionsForm() {
         </fieldset>
 
         <DateField
+          className="lg:col-span-1"
           hint="Укажите дату рождения человека, перенесшего инсульт"
           id="birth-date"
           label="Дата рождения"
@@ -115,7 +118,7 @@ export function OnboardingQuestionsForm() {
           value={birthDate}
         />
 
-        <fieldset>
+        <fieldset className="lg:col-span-1">
           <legend className="mb-2 min-[375px]:text-xl min-[375px]:leading-6">Пол</legend>
           <RadioGroup
             className="flex flex-wrap gap-4"
@@ -139,6 +142,7 @@ export function OnboardingQuestionsForm() {
         </fieldset>
 
         <DateField
+          className="lg:col-span-1"
           hint="Если точная дата неизвестна, укажите примерную"
           id="stroke-date"
           label="Дата инсульта"
@@ -150,7 +154,7 @@ export function OnboardingQuestionsForm() {
           value={strokeDate}
         />
 
-        <fieldset>
+        <fieldset className="lg:col-span-1">
           <legend className="mb-2 min-[375px]:text-xl min-[375px]:leading-6">Тип инсульта</legend>
           <RadioGroup
             className="flex flex-col gap-3"
@@ -175,14 +179,17 @@ export function OnboardingQuestionsForm() {
         </fieldset>
 
         {error ? (
-          <p className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive" role="alert">
+          <p
+            className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive lg:col-span-2"
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
       </form>
 
       <Button
-        className="mt-8 w-full"
+        className="mt-8 w-full lg:ml-auto lg:w-fit lg:min-w-56"
         disabled={isSubmitting}
         form="onboarding-questions-form"
         type="submit"
@@ -194,15 +201,15 @@ export function OnboardingQuestionsForm() {
   );
 }
 
-function DateField({ disabled, hint, id, label, onChange, value }: DateFieldProps) {
+function DateField({ className, disabled, hint, id, label, onChange, value }: DateFieldProps) {
   return (
-    <section className="flex flex-col gap-2">
+    <section className={cn("flex flex-col gap-2", className)}>
       <label className="min-[375px]:text-xl min-[375px]:leading-6" htmlFor={id}>
         {label}
       </label>
       <Input
         autoComplete={id === "birth-date" ? "bday" : "off"}
-        className="w-full max-w-[220px] min-[375px]:text-xl min-[375px]:leading-6"
+        className="w-full max-w-[220px] min-[375px]:text-xl min-[375px]:leading-6 lg:max-w-64"
         disabled={disabled}
         id={id}
         onChange={(event) => {
