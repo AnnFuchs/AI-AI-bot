@@ -147,11 +147,11 @@ def _enrich_symptoms_with_history(
 
 
 def _build_confidence_label(score: float) -> str:
-    if score >= 0.70:
+    if score >= 0.85:
         return "high"
-    elif score >= 0.55:
+    elif score >= 0.75:
         return "medium"
-    elif score >= 0.35:
+    elif score >= 0.62:
         return "low"
     return "insufficient"
 
@@ -887,9 +887,13 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
         ]
 
         intent = state.get("intent", IntentEnum.education)
+        history: List[Dict[str, str]] = list(state.get("messages") or [])
 
         if confidence_label == "insufficient":
-            fallback_text = "К сожалению, точной информации не найдено. Вот общая памятка."
+            fallback_text = (
+                "В доступных клинических рекомендациях нет точного ответа на этот вопрос. "
+                "Пожалуйста, уточните у вашего лечащего врача — он знает вашу историю болезни."
+            )
             meta = ResponseMeta(
                 confidence=rag_conf,
                 confidence_label=confidence_label,
@@ -900,18 +904,32 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
             write({"type": "buttons", "payload": [Button(label="Общая памятка", href="/learn").model_dump()]})
             write({"type": "token", "content": fallback_text})
             write({"type": "sources", "payload": meta.model_dump()})
+
+            # Точечно заменяем текущий провальный вопрос в истории,
+            # чтобы он не влиял на следующие ответы
+            current_user_message = state["user_message"]
+            sanitized_history = []
+            replaced = False
+            for msg in reversed(history):
+                if not replaced and msg.get("role") == "user" and msg.get("content") == current_user_message:
+                    sanitized_history.insert(0, {"role": "user", "content": "[вопрос вне базы знаний]"})
+                    replaced = True
+                else:
+                    sanitized_history.insert(0, msg)
+            sanitized_history.append({"role": "assistant", "content": fallback_text})
+
             return {
                 "response_text": fallback_text,
                 "response_type": ResponseType.text_with_buttons,
                 "buttons": [Button(label="Общая памятка", href="/learn")],
                 "backend_commands": [],
                 "response_meta": meta,
+                "messages": sanitized_history,
             }
 
         context = "\n\n".join([d["content"] for d in docs[:5]])
         patient_ctx = _build_patient_context_str(user_ctx)
         sys_prompt = f"{EDUCATION_SYSTEM_PROMPT}\nКонтекст: {context}{patient_ctx}"
-        history: List[Dict[str, str]] = list(state.get("messages") or [])
         messages = [{"role": "system", "content": sys_prompt}] + history
         full_text = ""
         try:
