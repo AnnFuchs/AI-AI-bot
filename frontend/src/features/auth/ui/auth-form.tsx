@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { ApiError } from "@/api/errors";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 
@@ -85,6 +86,18 @@ function getPasswordValidationMessage(mode: AuthFormProps["mode"]) {
     : "Введите пароль.";
 }
 
+function getAuthErrorMessage(error: unknown, mode: AuthFormProps["mode"]) {
+  if (mode === "login" && error instanceof ApiError && error.status === 401) {
+    return "Неверный телефон или пароль.";
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Не получилось выполнить запрос. Попробуйте еще раз.";
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [apiError, setApiError] = useState<string | null>(null);
@@ -115,9 +128,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const isSubmitting = form.formState.isSubmitting;
   const submitText = mode === "login" ? "Войти" : "Зарегистрироваться";
   const formError =
-    form.formState.errors.phone?.message ??
-    form.formState.errors.password?.message ??
-    apiError;
+    form.formState.errors.phone?.message ?? form.formState.errors.password?.message ?? apiError;
 
   const onSubmit = form.handleSubmit(async (values) => {
     setApiError(null);
@@ -139,11 +150,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       router.push(mode === "register" ? "/onboarding" : "/");
     } catch (caughtError) {
-      setApiError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "Не получилось выполнить запрос. Попробуйте еще раз.",
-      );
+      setApiError(getAuthErrorMessage(caughtError, mode));
     }
   });
 
@@ -153,53 +160,54 @@ export function AuthForm({ mode }: AuthFormProps) {
       onSubmit={onSubmit}
     >
       <div>
-        <label htmlFor={`${mode}-login`} className="min-[375px]:text-xl min-[375px]:leading-6">Телефон</label>
+        <label htmlFor={`${mode}-login`} className="min-[375px]:text-xl min-[375px]:leading-6">
+          Телефон
+        </label>
         <Input
-            className="mt-2 min-[375px]:text-xl min-[375px]:leading-6"
-            autoComplete="tel"
-            disabled={isSubmitting}
-            id={`${mode}-login`}
-            inputMode="tel"
-            maxLength={18}
-            aria-invalid={Boolean(form.formState.errors.phone)}
-            onChange={(event) => {
-              form.setValue("phone", formatPhoneInput(event.currentTarget.value), {
-                shouldDirty: true,
-                shouldValidate: true,
-              });
-              setApiError(null);
-            }}
-            placeholder="+7 (999) 999-99-99"
-            type="tel"
-            value={phoneValue}
-            name={phoneField.name}
-            onBlur={phoneField.onBlur}
-            ref={phoneField.ref}
+          className="mt-2 min-[375px]:text-xl min-[375px]:leading-6"
+          autoComplete="tel"
+          disabled={isSubmitting}
+          id={`${mode}-login`}
+          inputMode="tel"
+          maxLength={18}
+          aria-invalid={Boolean(form.formState.errors.phone)}
+          onChange={(event) => {
+            form.setValue("phone", formatPhoneInput(event.currentTarget.value), {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+            setApiError(null);
+          }}
+          placeholder="+7 (999) 999-99-99"
+          type="tel"
+          value={phoneValue}
+          name={phoneField.name}
+          onBlur={phoneField.onBlur}
+          ref={phoneField.ref}
         />
       </div>
 
       <div>
-        <label htmlFor={`${mode}-password`} className="min-[375px]:text-xl min-[375px]:leading-6">Пароль</label>
+        <label htmlFor={`${mode}-password`} className="min-[375px]:text-xl min-[375px]:leading-6">
+          Пароль
+        </label>
         <Input
-            className="mt-2 min-[375px]:text-xl min-[375px]:leading-6"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            disabled={isSubmitting}
-            id={`${mode}-password`}
-            type="password"
-            aria-invalid={Boolean(form.formState.errors.password)}
-            {...passwordField}
-            onChange={(event) => {
-              passwordField.onChange(event);
-              setApiError(null);
-            }}
+          className="mt-2 min-[375px]:text-xl min-[375px]:leading-6"
+          autoComplete={mode === "login" ? "current-password" : "new-password"}
+          disabled={isSubmitting}
+          id={`${mode}-password`}
+          type="password"
+          aria-invalid={Boolean(form.formState.errors.password)}
+          {...passwordField}
+          onChange={(event) => {
+            passwordField.onChange(event);
+            setApiError(null);
+          }}
         />
       </div>
 
       {formError ? (
-        <p
-          className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive"
-          role="alert"
-        >
+        <p className="rounded-xl bg-destructive/10 px-4 py-3 text-destructive" role="alert">
           {formError}
         </p>
       ) : null}
