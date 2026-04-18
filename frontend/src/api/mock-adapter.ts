@@ -63,11 +63,14 @@ export const mockAdapter = {
     const request = options.body as ChatRequest | undefined;
     const prompt = request?.message?.trim();
     const tokens = [
-      "Я рядом и внимательно вас слушаю. ",
-      prompt
-        ? "Пока backend не подключен, я отвечаю через mock-режим, но потоковая отправка уже работает. "
-        : "Напишите, с чем вам нужна помощь сегодня. ",
-      "Когда backend будет готов, этот же клиент будет получать ответы через POST-based SSE.",
+      "**Я рядом и внимательно вас слушаю.**\n\n",
+      prompt ? `Вы спросили: _${prompt}_\n\n` : "Напишите, с чем вам нужна помощь сегодня.\n\n",
+      "Пока backend не подключен, я отвечаю через mock-режим, но потоковая отправка уже работает.\n\n",
+      "Вот пример markdown-разметки:\n\n",
+      "- список отображается как список;\n",
+      "- **важные слова** выделяются жирным;\n",
+      "- ссылки открываются корректно: [База знаний](/learn).\n\n",
+      "`POST /chat/stream` уже готов к SSE через fetch.",
     ];
 
     return new ReadableStream<Uint8Array>({
@@ -81,7 +84,7 @@ export const mockAdapter = {
           await wait(220, options.signal);
           controller.enqueue(
             sse("text", {
-              text: " Могу также показать памятку, если ответ кажется недостаточным.",
+              text: "\n\n> Могу также показать памятку, если ответ кажется недостаточным.",
             }),
           );
 
@@ -114,12 +117,11 @@ export const mockAdapter = {
           controller.enqueue(
             sse("sources", {
               payload: {
-                confidence: 0.82,
                 confidence_label: "high",
                 sources: [
                   "Клинические рекомендации Ишемический инсульт 2024 https://cr.minzdrav.gov.ru/preview-cr/814_1",
+                  "Учебный источник без ссылки 2026 None",
                 ],
-                used_rag: true,
               },
             }),
           );

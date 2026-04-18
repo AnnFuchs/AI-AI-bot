@@ -5,6 +5,7 @@ import { Button } from "@/shared/ui/button";
 import { ArrowRightIcon } from "@/shared/ui/icons/arrow-right-icon";
 
 import { STROKE_INFO_ACTION } from "../lib/chat-actions";
+import { MarkdownMessage } from "./markdown-message";
 
 function isExternalHref(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
@@ -83,9 +84,7 @@ function AssistantMessage({
 }) {
   return (
     <div className="space-y-3">
-      <p className="whitespace-pre-wrap break-words">
-        {message.content || (isStreaming ? "Думаю..." : "")}
-      </p>
+      <MarkdownMessage>{message.content || (isStreaming ? "Думаю..." : "")}</MarkdownMessage>
       {message.alerts?.length ? (
         <div className="space-y-2">
           {message.alerts.map((alert, index) => (
