@@ -3,6 +3,7 @@ import type { SSEEvent } from "@/entities";
 type ParsedPayload = Record<string, unknown>;
 
 const URL_PATTERN = /https?:\/\/\S+/;
+const EMPTY_TEXT_VALUES = new Set(["", "none", "null", "undefined"]);
 
 function parseData(data: string) {
   if (!data) {
@@ -32,28 +33,18 @@ function readString(payload: ParsedPayload, keys: string[]) {
   return undefined;
 }
 
-function readNumber(payload: ParsedPayload, keys: string[]) {
-  for (const key of keys) {
-    const value = payload[key];
-
-    if (typeof value === "number") {
-      return value;
-    }
+function normalizeOptionalString(value: string | undefined) {
+  if (value === undefined) {
+    return undefined;
   }
 
-  return undefined;
+  const trimmedValue = value.trim();
+
+  return EMPTY_TEXT_VALUES.has(trimmedValue.toLowerCase()) ? undefined : trimmedValue;
 }
 
-function readBoolean(payload: ParsedPayload, keys: string[]) {
-  for (const key of keys) {
-    const value = payload[key];
-
-    if (typeof value === "boolean") {
-      return value;
-    }
-  }
-
-  return undefined;
+function readOptionalString(payload: ParsedPayload, keys: string[]) {
+  return normalizeOptionalString(readString(payload, keys));
 }
 
 function readEventPayload(payload: ParsedPayload | null) {
@@ -87,13 +78,23 @@ function readObjectList(payload: ParsedPayload, key: string) {
 }
 
 function parseFormattedSource(source: string) {
-  const trimmedSource = source.trim();
+  const trimmedSource = normalizeOptionalString(source);
+
+  if (!trimmedSource) {
+    return null;
+  }
+
   const url = trimmedSource.match(URL_PATTERN)?.[0];
-  const title = url ? trimmedSource.replace(url, "").trim() : trimmedSource;
+  const title = normalizeOptionalString(
+    (url ? trimmedSource.replace(url, "") : trimmedSource).replace(
+      /(?:\s+(?:none|null|undefined))+$/i,
+      "",
+    ),
+  );
 
   return {
-    source: title || trimmedSource,
-    title: title || trimmedSource,
+    source: title ?? trimmedSource,
+    title: title ?? trimmedSource,
     url,
   };
 }
@@ -107,19 +108,7 @@ function readSources(payload: ParsedPayload) {
 
   return value
     .map((source) => {
-      if (typeof source === "string") {
-        return parseFormattedSource(source);
-      }
-
-      if (isObject(source)) {
-        return {
-          source: readString(source, ["source", "name"]) ?? "",
-          title: readString(source, ["title"]),
-          url: readString(source, ["url", "href", "link"]),
-        };
-      }
-
-      return null;
+      return typeof source === "string" ? parseFormattedSource(source) : null;
     })
     .filter((source) => source !== null);
 }
@@ -234,10 +223,8 @@ export function parseSSEFrame(frame: string): SSEEvent | null {
     return {
       type: "sources",
       sources: {
-        confidence: readNumber(eventPayload, ["confidence"]),
-        confidence_label: readString(eventPayload, ["confidence_label", "confidenceLabel"]),
+        confidence_label: readOptionalString(eventPayload, ["confidence_label"]),
         sources,
-        used_rag: readBoolean(eventPayload, ["used_rag", "usedRag"]),
       },
     };
   }
