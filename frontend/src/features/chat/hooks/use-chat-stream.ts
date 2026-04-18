@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ChatAction, ChatMessage, SSEEvent } from "@/entities";
 
 import { streamChat } from "../api/chat-service";
 import { STROKE_INFO_ACTION } from "../lib/chat-actions";
+import { loadStoredChatState, saveStoredChatState } from "../lib/chat-storage";
 import { parseSSEFrame } from "../lib/parse-sse";
 
 type StreamStatus = "idle" | "streaming" | "error";
@@ -54,11 +55,34 @@ function appendAssistantAction(message: ChatMessage, action: Omit<ChatAction, "i
 }
 
 export function useChatStream() {
-  const sessionIdRef = useRef(createId());
-  const [messages, setMessages] = useState<ChatMessage[]>([createMessage("assistant", "welcome")]);
+  const initialChatStateRef = useRef<ReturnType<typeof loadStoredChatState> | undefined>(undefined);
+
+  if (initialChatStateRef.current === undefined) {
+    initialChatStateRef.current = loadStoredChatState();
+  }
+
+  const sessionIdRef = useRef(initialChatStateRef.current?.sessionId ?? createId());
+  const [messages, setMessages] = useState<ChatMessage[]>(
+    initialChatStateRef.current?.messages.length
+      ? initialChatStateRef.current.messages
+      : [createMessage("assistant", "welcome")],
+  );
   const [status, setStatus] = useState<StreamStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    saveStoredChatState({
+      sessionId: sessionIdRef.current,
+      messages,
+    });
+  }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   const applyEvent = useCallback((event: SSEEvent, assistantMessageId: string) => {
     if (event.type === "token" || event.type === "text") {
