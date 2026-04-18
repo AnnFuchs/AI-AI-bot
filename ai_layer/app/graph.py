@@ -947,6 +947,7 @@ def build_workflow(llm_handler: LLMHandler, rag_service: RAGService):
             intent=str(intent),
             used_rag=True,
         )
+        logger.info(f"Sources are {meta.model_dump()}")
         write({"type": "sources", "payload": meta.model_dump()})
 
         return {
