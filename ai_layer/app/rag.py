@@ -34,7 +34,6 @@ class RAGService:
         try:
             messages = [{"role": "system", "content": HYDE_PROMPT.format(query=query)}]
             hypothetical_doc = await self.llm_handler.chat_completion(messages, temperature=0.0)
-            logger.info(f"HyDE generated doc: {hypothetical_doc}...")
             return await self.llm_handler.get_embedding(hypothetical_doc)
         except Exception as e:
             logger.warning(f"HyDE failed, falling back to direct embedding: {e}")
@@ -59,7 +58,7 @@ class RAGService:
             # 1. Получаем HYDE вектор, raw вектор и sparse параллельно
             messages = [{"role": "system", "content": HYDE_PROMPT.format(query=query)}]
             hyde_text = await self.llm_handler.chat_completion(messages, temperature=0.0)
-
+            logger.info(f"HyDE generated doc: {hyde_text}...")
             # 2. Получаем оба вектора одним батчем (1 запрос Embedding)
             vectors = await self.llm_handler.get_embeddings_batch([hyde_text, query])
             dense_vector, raw_vector = vectors[0], vectors[1]
