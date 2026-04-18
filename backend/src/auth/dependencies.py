@@ -28,8 +28,8 @@ async def get_current_user(
         auth_data = settings.jwt_auth_data
         payload = jwt.decode(
             token,
-            auth_data['secret_key'],
-            algorithms=[auth_data['algorithm']],
+            auth_data['SECRET_KEY'],
+            algorithms=[auth_data['ALGORITHM']],
         )
     except ExpiredSignatureError:
         raise HTTPException(
