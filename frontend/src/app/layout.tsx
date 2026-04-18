@@ -8,8 +8,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Ай-Яй",
-    template: "%s | Ай-Яй",
+    default: "Ай-Яй - Инсультный Бадди",
+    template: "%s | Ай-Яй - Инсультный Бадди",
   },
   description:
     "Ежедневная поддержка во время восстановления после инсульта.",

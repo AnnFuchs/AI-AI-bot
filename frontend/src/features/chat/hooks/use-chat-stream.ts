@@ -2,9 +2,10 @@
 
 import { useCallback, useRef, useState } from "react";
 
-import type { ChatMessage, SSEEvent } from "@/entities";
+import type { ChatAction, ChatMessage, SSEEvent } from "@/entities";
 
 import { streamChat } from "../api/chat-service";
+import { STROKE_INFO_ACTION } from "../lib/chat-actions";
 import { parseSSEFrame } from "../lib/parse-sse";
 
 type StreamStatus = "idle" | "streaming" | "error";
@@ -22,10 +23,36 @@ function createMessage(role: ChatMessage["role"], content: string): ChatMessage 
   };
 }
 
+function createAction(action: Omit<ChatAction, "id">): ChatAction {
+  return {
+    id: createId(),
+    ...action,
+  };
+}
+
 function appendAssistantContent(message: ChatMessage, content: string): ChatMessage {
   return {
     ...message,
     content: `${message.content}${content}`,
+  };
+}
+
+function appendAssistantAction(
+  message: ChatMessage,
+  action: Omit<ChatAction, "id">,
+): ChatMessage {
+  const actions = message.actions ?? [];
+  const shouldAddStrokeInfoAction = !actions.some(
+    (currentAction) => currentAction.href === STROKE_INFO_ACTION.href,
+  );
+
+  return {
+    ...message,
+    actions: [
+      ...actions,
+      createAction(action),
+      ...(shouldAddStrokeInfoAction ? [createAction(STROKE_INFO_ACTION)] : []),
+    ],
   };
 }
 
@@ -56,16 +83,7 @@ export function useChatStream() {
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
-            ? {
-                ...message,
-                actions: [
-                  ...(message.actions ?? []),
-                  {
-                    id: createId(),
-                    ...event.button,
-                  },
-                ],
-              }
+            ? appendAssistantAction(message, event.button)
             : message,
         ),
       );

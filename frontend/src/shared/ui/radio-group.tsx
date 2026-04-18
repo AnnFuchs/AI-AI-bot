@@ -1,39 +1,44 @@
-"use client";
+"use client"
 
-import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
-import * as React from "react";
+import * as React from "react"
+import { RadioGroup as RadioGroupPrimitive } from "radix-ui"
 
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/shared/lib/utils"
 
-const RadioGroup = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <RadioGroupPrimitive.Root
-    className={cn("grid gap-3", className)}
-    ref={ref}
-    {...props}
-  />
-));
-RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
+function RadioGroup({
+                      className,
+                      ...props
+                    }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
+  return (
+      <RadioGroupPrimitive.Root
+          data-slot="radio-group"
+          className={cn("grid gap-3", className)}
+          {...props}
+      />
+  )
+}
 
-const RadioGroupItem = React.forwardRef<
-  React.ElementRef<typeof RadioGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({ className, ...props }, ref) => (
-  <RadioGroupPrimitive.Item
-    className={cn(
-      "flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-border bg-white transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:border-primary",
-      className,
-    )}
-    ref={ref}
-    {...props}
-  >
-    <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-      <span className="size-5 rounded-full bg-primary" />
-    </RadioGroupPrimitive.Indicator>
-  </RadioGroupPrimitive.Item>
-));
-RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName;
+function RadioGroupItem({
+                          className,
+                          ...props
+                        }: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
+  return (
+      <RadioGroupPrimitive.Item
+          data-slot="radio-group-item"
+          className={cn(
+              "grid size-7 shrink-0 place-items-center rounded-full border-2 border-border bg-white outline-none transition-colors focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-4 aria-invalid:ring-destructive/20 data-[state=checked]:border-primary",
+              className
+          )}
+          {...props}
+      >
+        <RadioGroupPrimitive.Indicator
+            data-slot="radio-group-indicator"
+            className="grid size-full place-items-center"
+        >
+          <span className="block size-4 rounded-full bg-primary" />
+        </RadioGroupPrimitive.Indicator>
+      </RadioGroupPrimitive.Item>
+  )
+}
 
-export { RadioGroup, RadioGroupItem };
+export { RadioGroup, RadioGroupItem }

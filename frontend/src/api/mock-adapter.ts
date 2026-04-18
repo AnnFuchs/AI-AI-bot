@@ -92,7 +92,7 @@ export const mockAdapter = {
           controller.enqueue(
             sse("button", {
               label: "Открыть памятку",
-              href: "/learn/articles/when-to-see-a-doctor",
+              href: "/learn",
             }),
           );
 
@@ -120,9 +120,7 @@ export const mockAdapter = {
                 confidence: 0.82,
                 confidence_label: "high",
                 sources: [
-                  {
-                    source: "Клинические_рекомендации_Ишемический_инсульт_2024.pdf",
-                  },
+                  "Клинические рекомендации Ишемический инсульт 2024 https://cr.minzdrav.gov.ru/preview-cr/814_1",
                 ],
                 used_rag: true,
               },
