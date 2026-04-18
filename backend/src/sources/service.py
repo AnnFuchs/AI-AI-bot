@@ -1,10 +1,10 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.sources.errors import DuplicateInfoError
 from src.sources.models import Source
 from src.sources.schemas import SourceCreate
 from src.sources.validators import check_source_duplicate
-from src.users.errors import DuplicateInfoError
 
 
 class SourceService:
@@ -32,3 +32,6 @@ class SourceService:
 
         await session.refresh(source)
         return source
+
+
+source_service = SourceService()
