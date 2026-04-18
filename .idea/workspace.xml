@@ -5,19 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/frontend/public/images/ai-yai-mascot.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/learn/articles/[slug]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/learn/articles/[slug]/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/learn/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/learn/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/login/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/app/onboarding/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/onboarding/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/register/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/register/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/settings/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/features/auth/ui/auth-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/auth/ui/auth-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/ui/chat-page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/features/chat/ui/message-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/chat/ui/message-list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/features/onboarding/ui/onboarding-questions-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/onboarding/ui/onboarding-questions-form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/shared/layout/app-shell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/shared/layout/app-shell.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,6 +70,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\frontend\public\images" />
       <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\frontend\src\shared\ui" />
       <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\src\shared\ui" />
     </key>
@@ -118,7 +109,8 @@
       <workItem from="1776267401419" duration="25283000" />
       <workItem from="1776410153013" duration="102000" />
       <workItem from="1776419098970" duration="1089000" />
-      <workItem from="1776446543200" duration="16165000" />
+      <workItem from="1776446543200" duration="16283000" />
+      <workItem from="1776512840542" duration="2800000" />
     </task>
     <servers />
   </component>
