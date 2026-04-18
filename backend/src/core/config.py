@@ -38,21 +38,25 @@ class Settings(BaseSettings):
             f'{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
         )
 
-    secret_key: SecretStr
-    algorithm: str
+    SECRET_KEY: SecretStr
+    ALGORITHM: str
 
     @property
     def jwt_auth_data(self) -> dict:
         """Generation of data for jwt."""
         return {
-            'secret_key': self.secret_key.get_secret_value(),
-            'algorithm': self.algorithm,
+            'SECRET_KEY': self.SECRET_KEY.get_secret_value(),
+            'ALGORITHM': self.ALGORITHM,
         }
 
-    first_superuser_phone: PhoneNumber
-    first_superuser_password: SecretStr
+    FIRST_SUPERUSER_PHONE: PhoneNumber
+    FIRST_SUPERUSER_PASSWORD: SecretStr
 
     AI_LAYER_URL: str = 'http://localhost:8001'
+
+    VAPID_PRIVATE_KEY: SecretStr
+    VAPID_PUBLIC_KEY: SecretStr
+    VAPID_CLAIMS_EMAIL: str
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR.parent / 'infra' / '.env',
