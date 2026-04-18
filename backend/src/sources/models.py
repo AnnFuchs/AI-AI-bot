@@ -12,6 +12,7 @@ class Source(CommonMixin, Base):
 
     source_file_name: Mapped[str] = mapped_column(
         String(SOURCE_NAME_LEN),
+        unique=True,
         nullable=False,
         index=True,
     )
@@ -22,6 +23,7 @@ class Source(CommonMixin, Base):
     )
     source_name: Mapped[str] = mapped_column(
         String(SOURCE_NAME_LEN),
+        unique=True,
         nullable=False,
     )
     source_date: Mapped[int] = mapped_column(
@@ -29,4 +31,5 @@ class Source(CommonMixin, Base):
     )
     source_url: Mapped[str] = mapped_column(
         String(SOURCE_URL_LEN),
+        unique=True,
     )
