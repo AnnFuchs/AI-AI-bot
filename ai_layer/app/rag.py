@@ -34,7 +34,7 @@ class RAGService:
         try:
             messages = [{"role": "system", "content": HYDE_PROMPT.format(query=query)}]
             hypothetical_doc = await self.llm_handler.chat_completion(messages, temperature=0.0)
-            logger.info(f"HyDE generated doc: {hypothetical_doc[:100]}...")
+            logger.info(f"HyDE generated doc: {hypothetical_doc}...")
             return await self.llm_handler.get_embedding(hypothetical_doc)
         except Exception as e:
             logger.warning(f"HyDE failed, falling back to direct embedding: {e}")
