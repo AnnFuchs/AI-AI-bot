@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.sources.models import Source
-from src.users.errors import DuplicateInfoError
+from src.sources.errors import DuplicateInfoError
 
 
 async def check_source_duplicate(

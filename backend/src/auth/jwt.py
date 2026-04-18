@@ -15,8 +15,8 @@ def create_access_token(data: dict) -> str:
     auth_data = settings.jwt_auth_data
     return jwt.encode(
         to_encode,
-        auth_data['secret_key'],
-        algorithm=auth_data['algorithm'],
+        auth_data['SECRET_KEY'],
+        algorithm=auth_data['ALGORITHM'],
     )
 
 
@@ -29,5 +29,5 @@ def create_refresh_token(data: dict) -> tuple[str, str]:
     auth_data = settings.jwt_auth_data
     return jwt.encode(
         to_encode,
-        auth_data['secret_key'],
-        algorithm=auth_data['algorithm']), jti
+        auth_data['SECRET_KEY'],
+        algorithm=auth_data['ALGORITHM']), jti
