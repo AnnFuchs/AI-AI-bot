@@ -35,11 +35,7 @@ type MessageListProps = {
   onSourcesOpen: () => void;
 };
 
-export function MessageList({
-  messages,
-  isStreaming,
-  onSourcesOpen,
-}: MessageListProps) {
+export function MessageList({ messages, isStreaming, onSourcesOpen }: MessageListProps) {
   return (
     <ol aria-label="Сообщения чата" className="flex flex-col gap-6">
       {messages.map((message, index) => {
@@ -51,22 +47,15 @@ export function MessageList({
             <li className="ml-auto flex max-w-[85%] flex-col" key={message.id}>
               <p className="mb-2 text-sm font-semibold leading-6 text-muted-foreground">Вы:</p>
               <div className="rounded-xl bg-black/5 px-4 py-3 text-foreground">
-                <p className="whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
+                <p className="whitespace-pre-wrap break-words">{message.content}</p>
               </div>
             </li>
           );
         }
 
         return (
-          <li
-            className="w-full text-foreground sm:mr-auto sm:max-w-[88%]"
-            key={message.id}
-          >
-            <p className="mb-2 text-sm font-semibold leading-6 text-muted-foreground">
-              Ай-Яй:
-            </p>
+          <li className="w-full text-foreground sm:mr-auto sm:max-w-[88%]" key={message.id}>
+            <p className="mb-2 text-sm font-semibold leading-6 text-muted-foreground">Ай-Яй:</p>
             {isWelcomeMessage ? (
               <WelcomeMessage />
             ) : (
@@ -119,9 +108,7 @@ function AssistantMessage({
                 target={isExternalHref(action.href) ? "_blank" : undefined}
               >
                 {action.label}
-                {isStrokeInfoHref(action.href) ? (
-                  <ArrowRightIcon aria-hidden="true" />
-                ) : null}
+                {isStrokeInfoHref(action.href) ? <ArrowRightIcon aria-hidden="true" /> : null}
               </Link>
             </Button>
           ))}
@@ -130,11 +117,7 @@ function AssistantMessage({
       {message.sources?.length ? (
         <div className="space-y-2">
           {message.sources.map((sources, index) => (
-            <SourcesBlock
-              key={index}
-              onOpen={onSourcesOpen}
-              sources={sources}
-            />
+            <SourcesBlock key={index} onOpen={onSourcesOpen} sources={sources} />
           ))}
         </div>
       ) : null}
@@ -151,9 +134,7 @@ function AlertBlock({ alert }: { alert: NonNullable<ChatMessage["alerts"]>[numbe
           {alert.red_flags.map((flag, index) => (
             <li className="break-words" key={`${flag.name}-${index}`}>
               <p>{flag.description || flag.name}</p>
-              {flag.target_info ? (
-                <p className="text-base leading-6">{flag.target_info}</p>
-              ) : null}
+              {flag.target_info ? <p className="text-base leading-6">{flag.target_info}</p> : null}
             </li>
           ))}
         </ul>
@@ -190,12 +171,7 @@ function SourcesBlock({
             {sources.sources.map((source, index) => (
               <li className="break-words" key={`${source.source}-${index}`}>
                 {source.url ? (
-                  <Link
-                    className="underline"
-                    href={source.url}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
+                  <Link className="underline" href={source.url} rel="noreferrer" target="_blank">
                     {source.title ?? source.source}
                   </Link>
                 ) : (
@@ -213,41 +189,22 @@ function SourcesBlock({
 function WelcomeMessage() {
   return (
     <div className="space-y-4">
+      <p>Еще раз здравствуйте! Меня зовут Ай-Яй и я ваш помощник в жизни после инсульта.</p>
       <p>
-        Еще раз здравствуйте! Меня зовут Ай-Яй и я ваш помощник в жизни после
-        инсульта.
-      </p>
-      <p>
-        Буду рад помочь разобраться в происходящем и сориентироваться в море
-        информации о заболевании и жизни с ним. Также помогу не пропустить
-        важные симптомы и чувствовать себя спокойнее и увереннее!
+        Буду рад помочь разобраться в происходящем и сориентироваться в море информации о
+        заболевании и жизни с ним. Также помогу не пропустить важные симптомы и чувствовать себя
+        спокойнее и увереннее!
       </p>
       <p>Еще есть много полезной информации в Базе знаний. Например:</p>
       <div className="flex flex-col items-start gap-2">
-        <Button
-          asChild
-          className="max-w-full justify-start overflow-hidden px-4"
-          variant="chat"
-        >
-          <Link href="/learn/articles/why-stroke-happens">
-            Это лечится?
-          </Link>
+        <Button asChild className="max-w-full justify-start overflow-hidden px-4" variant="chat">
+          <Link href="/learn/articles/why-stroke-happens">Это лечится?</Link>
         </Button>
-        <Button
-          asChild
-          className="max-w-full justify-start overflow-hidden px-4"
-          variant="chat"
-        >
+        <Button asChild className="max-w-full justify-start overflow-hidden px-4" variant="chat">
           <Link href="/learn/articles/what-is-stroke">Что такое инсульт?</Link>
         </Button>
-        <Button
-          asChild
-          className="max-w-full justify-start overflow-hidden px-4"
-          variant="chat"
-        >
-          <Link href="/learn/articles/can-stroke-happen-again">
-            Инсульт может повториться?
-          </Link>
+        <Button asChild className="max-w-full justify-start overflow-hidden px-4" variant="chat">
+          <Link href="/learn/articles/can-stroke-happen-again">Инсульт может повториться?</Link>
         </Button>
       </div>
       <p>Не стесняйтесь спрашивать, я постараюсь помочь! =)</p>

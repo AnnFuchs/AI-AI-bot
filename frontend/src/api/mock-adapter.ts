@@ -37,10 +37,7 @@ const mockAuthToken: AuthToken = {
 };
 
 export const mockAdapter = {
-  async request<TResponse, TBody>(
-    path?: string,
-    options?: ApiRequestOptions<TBody>,
-  ) {
+  async request<TResponse, TBody>(path?: string, options?: ApiRequestOptions<TBody>) {
     void options;
 
     if (path === "/auth/login") {

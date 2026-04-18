@@ -1,10 +1,5 @@
 import { apiClient } from "@/api/client";
-import type {
-  AuthCredentials,
-  AuthToken,
-  RefreshTokenRequest,
-  RegisterRequest,
-} from "@/entities";
+import type { AuthCredentials, AuthToken, RefreshTokenRequest, RegisterRequest } from "@/entities";
 
 import { clearAuthToken, saveAuthToken } from "../lib/token-storage";
 

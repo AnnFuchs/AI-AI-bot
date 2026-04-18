@@ -42,12 +42,9 @@ export default function LearnPage() {
         <p className="text-sm font-semibold uppercase leading-6 text-muted-foreground">
           База знаний
         </p>
-        <h1 className="mt-3 text-3xl font-semibold leading-6">
-          Полезная информация рядом.
-        </h1>
+        <h1 className="mt-3 text-3xl font-semibold leading-6">Полезная информация рядом.</h1>
         <p className="mt-4 max-w-2xl">
-          Короткие ответы на частые вопросы о заболевании, восстановлении и жизни
-          после инсульта.
+          Короткие ответы на частые вопросы о заболевании, восстановлении и жизни после инсульта.
         </p>
       </section>
 
@@ -76,9 +73,7 @@ export default function LearnPage() {
                     key={article.slug}
                     variant="chat"
                   >
-                    <Link href={`/learn/articles/${article.slug}`}>
-                      {article.title}
-                    </Link>
+                    <Link href={`/learn/articles/${article.slug}`}>{article.title}</Link>
                   </Button>
                 ))}
               </div>

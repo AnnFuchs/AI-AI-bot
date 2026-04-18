@@ -1,0 +1,9 @@
+.next/
+node_modules/
+.idea/
+out/
+dist/
+coverage/
+.vercel/
+*.tsbuildinfo
+package-lock.json

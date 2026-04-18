@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 
 import { useChatStream } from "../hooks/use-chat-stream";
 import { ChatInput } from "./chat-input";
@@ -9,6 +9,7 @@ import { MessageList } from "./message-list";
 export function ChatPage() {
   const { error, messages, sendMessage, status } = useChatStream();
   const messagesSectionRef = useRef<HTMLElement | null>(null);
+  const hasScrolledOnMountRef = useRef(false);
   const isStreaming = status === "streaming";
 
   const scrollToChatEnd = useCallback((behavior: ScrollBehavior = "smooth") => {
@@ -30,7 +31,13 @@ export function ChatPage() {
     });
   }, [scrollToChatEnd]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!hasScrolledOnMountRef.current) {
+      hasScrolledOnMountRef.current = true;
+      scrollToChatEnd("auto");
+      return;
+    }
+
     const frameId = requestAnimationFrame(() => {
       scrollToChatEnd(isStreaming ? "auto" : "smooth");
     });
