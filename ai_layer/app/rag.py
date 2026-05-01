@@ -31,11 +31,11 @@ class RAGService:
         try:
             # 1. Генерируем HyDE текст
             messages = [{"role": "system", "content": HYDE_PROMPT.format(query=query)}]
-            hyde_text = await self.llm_handler.chat_completion(messages, temperature=0.0)
+            hyde_text = await self.llm_handler.complete(messages, temperature=0.0)
             logger.info(f"HyDE generated doc: {hyde_text}...")
 
             # 2. Получаем dense векторы батчем (1 запрос к Embedding API)
-            vectors = await self.llm_handler.get_embeddings_batch([hyde_text, query])
+            vectors = await self.llm_handler.embed([hyde_text, query])
             dense_vector, raw_vector = vectors[0], vectors[1]
 
             # 3. Настройка фильтра

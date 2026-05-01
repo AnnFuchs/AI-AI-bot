@@ -59,7 +59,7 @@ async def event_generator(request: ChatRequest, graph) -> AsyncGenerator[str, No
         "user_id": request.user_id,
         "session_id": request.session_id,
         "user_message": request.message,
-        "user_context": request.user_context
+        "user_context": request.user_context.model_dump()
     }
     config = {
         "configurable": {"thread_id": request.session_id}
