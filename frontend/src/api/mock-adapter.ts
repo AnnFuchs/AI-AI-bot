@@ -1,4 +1,4 @@
-import type { AuthToken, ChatRequest } from "@/entities";
+import type { AuthToken, ChatRequest, ReminderOut, UserInfo } from "@/entities";
 
 type ApiRequestOptions<TBody> = {
   body?: TBody;
@@ -36,10 +36,35 @@ const mockAuthToken: AuthToken = {
   token_type: "Bearer",
 };
 
+let mockUser: UserInfo = {
+  phone: "+79990000000",
+  daily_checkin_enabled: true,
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+};
+
+let mockReminders: ReminderOut[] = [
+  {
+    id: "9a42761b-2047-4a8f-a02d-40b372284d3d",
+    reminder_type: "medication",
+    med_name: "Аспирин",
+    time: "09:00:00",
+    days: ["пн", "вт", "ср", "чт", "пт"],
+    is_active: true,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "56f2d578-42a2-48c4-b5c6-69c121c54c78",
+    reminder_type: "daily_checkin",
+    med_name: null,
+    time: "20:00:00",
+    days: [],
+    is_active: true,
+    created_at: new Date().toISOString(),
+  },
+];
+
 export const mockAdapter = {
   async request<TResponse, TBody>(path?: string, options?: ApiRequestOptions<TBody>) {
-    void options;
-
     if (path === "/auth/login") {
       return mockAuthToken as TResponse;
     }
@@ -49,7 +74,43 @@ export const mockAdapter = {
     }
 
     if (path === "/users/me") {
-      return (options?.body ?? {}) as TResponse;
+      mockUser = {
+        ...mockUser,
+        ...((options?.body as Partial<UserInfo> | undefined) ?? {}),
+      };
+
+      return mockUser as TResponse;
+    }
+
+    if (path === "/users/me/timezone") {
+      mockUser = {
+        ...mockUser,
+        ...((options?.body as Partial<UserInfo> | undefined) ?? {}),
+      };
+
+      return mockUser as TResponse;
+    }
+
+    if (path === "/reminders/vapid-public-key") {
+      return {
+        public_key:
+          "BEl62iUYgUivxIkv69yViEuiBIa40HI80JtmQj6U6SI1rEVjT3Z7DcqFjo1zOj8bSh2j0sUB70Tz0Vfwo99YxUI",
+      } as TResponse;
+    }
+
+    if (path === "/reminders/push-subscription") {
+      return {} as TResponse;
+    }
+
+    if (path === "/reminders/") {
+      return mockReminders as TResponse;
+    }
+
+    if (path?.startsWith("/reminders/")) {
+      const reminderId = path.replace("/reminders/", "");
+      mockReminders = mockReminders.filter((reminder) => reminder.id !== reminderId);
+
+      return undefined as TResponse;
     }
 
     return {} as TResponse;

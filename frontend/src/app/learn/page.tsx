@@ -38,30 +38,21 @@ function getArticlesBySlugs(slugs: string[]) {
 export default function LearnPage() {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 pb-8 pt-3 min-[375px]:px-5">
-      <section className="pb-5">
+      <div className="pb-5">
         <p className="text-sm font-semibold uppercase leading-6 text-muted-foreground">
           База знаний
         </p>
-        <h1 className="mt-3 text-3xl font-semibold leading-6">Полезная информация рядом.</h1>
+        <h1 className="mt-3 text-3xl font-semibold leading-7">Полезная информация рядом.</h1>
         <p className="mt-4 max-w-2xl">
           Короткие ответы на частые вопросы о заболевании, восстановлении и жизни после инсульта.
         </p>
-      </section>
+      </div>
 
-      <section aria-label="Статьи">
+      <div className="flex flex-col gap-5">
         {articleGroups.map((group, index) => {
-          const isFirstGroup = index === 0;
-          const isLastGroup = index === articleGroups.length - 1;
-
           return (
             <section
-              className={
-                isFirstGroup
-                  ? "pb-5"
-                  : isLastGroup
-                    ? "border-t border-border pt-5"
-                    : "border-t border-border py-5"
-              }
+              className="border-t border-border pt-5"
               key={group.title}
             >
               <h2 className="mb-3 text-muted-foreground">{group.title}</h2>
@@ -80,7 +71,7 @@ export default function LearnPage() {
             </section>
           );
         })}
-      </section>
+      </div>
     </main>
   );
 }
