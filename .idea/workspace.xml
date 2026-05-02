@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/frontend/public/images/ai-yai-mascot.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/app/onboarding/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/onboarding/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/auth/api/auth-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/auth/api/auth-service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/auth/lib/token-storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/auth/lib/token-storage.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/auth/ui/auth-form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/auth/ui/auth-form.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,6 +53,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;JavaScript Debug.localhost:3000.executor&quot;: &quot;Debug&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
@@ -75,8 +78,11 @@
       <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\src\shared\ui" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.Next.js: server-side">
+  <component name="RunManager" selected="JavaScript Debug.localhost:3000">
     <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="localhost:3000" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:3000">
       <method v="2" />
     </configuration>
     <configuration name="Next.js: server-side" type="js.build_tools.npm">
@@ -89,6 +95,11 @@
       <envs />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.localhost:3000" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -110,7 +121,9 @@
       <workItem from="1776410153013" duration="102000" />
       <workItem from="1776419098970" duration="1089000" />
       <workItem from="1776446543200" duration="16283000" />
-      <workItem from="1776512840542" duration="2800000" />
+      <workItem from="1776512840542" duration="13738000" />
+      <workItem from="1777402746767" duration="3916000" />
+      <workItem from="1777716745850" duration="5101000" />
     </task>
     <servers />
   </component>
