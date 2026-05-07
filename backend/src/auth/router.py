@@ -1,12 +1,19 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    Cookie,
+    Depends,
+    HTTPException,
+    Response,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import get_current_user
 from src.auth.jwt import create_access_token, create_refresh_token
-from src.auth.schemas import AuthData, AuthToken, RefreshTokenRequest
+from src.auth.schemas import AuthData, AuthToken
 from src.auth.service import auth_service
 from src.core.constants import REFRESH_TOKEN_LIFE, TOKEN_TYPE
 from src.db.session import get_async_session
@@ -18,7 +25,11 @@ SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 
 
 @router.post('/login', summary='Get auth token', response_model=AuthToken)
-async def auth_user(user_data: AuthData, session: SessionDep) -> AuthToken:
+async def auth_user(
+    user_data: AuthData,
+    session: SessionDep,
+    response: Response,
+) -> AuthToken:
     """Return access and refresh tokens."""
     user = await auth_service.auth_by_login(
         user_data.login, user_data.password, session,
@@ -42,9 +53,15 @@ async def auth_user(user_data: AuthData, session: SessionDep) -> AuthToken:
         datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_LIFE),
         session,
     )
+    response.set_cookie(
+        key='refresh_token',
+        value=refresh_token_str,
+        httponly=True,
+        samesite='lax',
+        secure=True,
+    )
     return AuthToken(
         access_token=access_token,
-        refresh_token=refresh_token_str,
         token_type=TOKEN_TYPE,
     )
 
@@ -55,16 +72,23 @@ async def auth_user(user_data: AuthData, session: SessionDep) -> AuthToken:
     response_model=AuthToken,
 )
 async def refresh_token(
-    payload: RefreshTokenRequest,
     session: SessionDep,
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
 ) -> AuthToken:
     """Rotate refresh token and issue new access token."""
-    jti = auth_service.extract_token_jti(payload.refresh_token)
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Refresh token missing.',
+        )
+
+    jti = auth_service.extract_token_jti(refresh_token)
 
     db_token = await auth_service.get_valid_refresh_token(jti, session)
     if not db_token:
         await auth_service.revoke_all_user_tokens(
-            auth_service.extract_user_id_safe(payload.refresh_token), session,
+            auth_service.extract_user_id_safe(refresh_token), session,
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -88,21 +112,32 @@ async def refresh_token(
         datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_LIFE),
         session,
     )
+    response.set_cookie(
+        key='refresh_token',
+        value=new_refresh_str,
+        httponly=True,
+        samesite='lax',
+    )
     return AuthToken(
         access_token=new_access,
-        refresh_token=new_refresh_str,
         token_type=TOKEN_TYPE,
     )
 
 
-@router.post('/logout', summary='Log user out')
+@router.post(
+    '/logout',
+    summary='Log user out',
+    dependencies=[Depends(get_current_user)],
+)
 async def logout_user(
-    payload: RefreshTokenRequest,
     session: SessionDep,
-    current_user: User = Depends(get_current_user),
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
 ) -> dict:
     """Revoke refresh token."""
-    jti = auth_service.extract_jti_safe(payload.refresh_token)
-    if jti:
-        await auth_service.revoke_refresh_token(jti, session)
+    if refresh_token:
+        jti = auth_service.extract_jti_safe(refresh_token)
+        if jti:
+            await auth_service.revoke_refresh_token(jti, session)
+    response.delete_cookie('refresh_token')
     return {'detail': 'Successfully logged out.'}
