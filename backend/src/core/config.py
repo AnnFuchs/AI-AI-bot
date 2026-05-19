@@ -1,3 +1,4 @@
+from datetime import timedelta, timezone
 from pathlib import Path
 
 from pydantic import SecretStr, field_validator
@@ -57,6 +58,8 @@ class Settings(BaseSettings):
     VAPID_PRIVATE_KEY: SecretStr
     VAPID_PUBLIC_KEY: SecretStr
     VAPID_CLAIMS_EMAIL: str
+
+    DEFAULT_TZ: timezone = timezone(timedelta(hours=3))
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR.parent / 'infra' / '.env',

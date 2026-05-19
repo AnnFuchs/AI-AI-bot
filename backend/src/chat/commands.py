@@ -1,8 +1,10 @@
 import uuid
+from datetime import time as dt_time
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.config import settings
 from src.core.constants import EntryType
 from src.core.logger import logger
 from src.diary.schemas import DiaryEntryCreate
@@ -54,9 +56,20 @@ async def _upsert_reminder(
         reminder = Reminder(user_id=user.id)
         db.add(reminder)
 
+    time_raw = payload.get('time')
+    parsed_time: dt_time | None = None
+    if time_raw:
+        try:
+            parsed_time = dt_time.fromisoformat(time_raw)
+        except (ValueError, TypeError):
+            logger.warning('Invalid time value from AI: %s', time_raw)
+
+    if parsed_time.tzinfo is None:
+        parsed_time = parsed_time.replace(tzinfo=settings.DEFAULT_TZ)
+
     reminder.reminder_type = payload['reminder_type']
     reminder.med_name = payload.get('med_name')
-    reminder.time = payload.get('time')
+    reminder.time = parsed_time
     reminder.days = payload.get('days', [])
     reminder.is_active = True
 
