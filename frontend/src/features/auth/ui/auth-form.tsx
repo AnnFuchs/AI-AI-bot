@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { ApiError } from "@/api/errors";
@@ -9,6 +9,17 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 
 import { login, register } from "../api/auth-service";
+import {
+  formatPhoneInput,
+  getCaretPositionForNationalDigitIndex,
+  getMaskDigitRemovalIndex,
+  getNationalDigitCaretIndex,
+  isAllowedPhoneInput,
+  isValidPhone,
+  normalizePhone,
+  PHONE_VALIDATION_MESSAGE,
+  removeNationalDigitAt,
+} from "../lib/phone-input";
 
 type AuthFormProps = {
   mode: "login" | "register";
@@ -18,63 +29,6 @@ type AuthFormValues = {
   phone: string;
   password: string;
 };
-
-function getPhoneDigits(value: string) {
-  const digits = value.replace(/\D/g, "");
-
-  if (!digits) {
-    return "";
-  }
-
-  if (digits.startsWith("8")) {
-    return `7${digits.slice(1)}`.slice(0, 11);
-  }
-
-  if (digits.startsWith("7")) {
-    return digits.slice(0, 11);
-  }
-
-  return `7${digits}`.slice(0, 11);
-}
-
-function formatPhoneInput(value: string) {
-  const digits = getPhoneDigits(value);
-
-  if (!digits) {
-    return "";
-  }
-
-  const nationalNumber = digits.slice(1);
-  const parts = ["+7"];
-
-  if (nationalNumber.length > 0) {
-    parts.push(` (${nationalNumber.slice(0, 3)}`);
-  }
-
-  if (nationalNumber.length >= 3) {
-    parts[1] = `${parts[1]})`;
-  }
-
-  if (nationalNumber.length > 3) {
-    parts.push(` ${nationalNumber.slice(3, 6)}`);
-  }
-
-  if (nationalNumber.length > 6) {
-    parts.push(`-${nationalNumber.slice(6, 8)}`);
-  }
-
-  if (nationalNumber.length > 8) {
-    parts.push(`-${nationalNumber.slice(8, 10)}`);
-  }
-
-  return parts.join("");
-}
-
-function normalizePhoneForApi(value: string) {
-  const digits = getPhoneDigits(value);
-
-  return digits.length === 11 ? `+${digits}` : "";
-}
 
 function isValidRegistrationPassword(password: string) {
   return /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/.test(password);
@@ -101,15 +55,16 @@ function getAuthErrorMessage(error: unknown, mode: AuthFormProps["mode"]) {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [apiError, setApiError] = useState<string | null>(null);
+  const phoneInputRef = useRef<HTMLInputElement | null>(null);
   const form = useForm<AuthFormValues>({
     defaultValues: {
       phone: "",
       password: "",
     },
+    reValidateMode: "onSubmit",
   });
   const phoneField = form.register("phone", {
-    validate: (value) =>
-      Boolean(normalizePhoneForApi(value)) || "Введите номер телефона полностью.",
+    validate: (value) => isValidPhone(value) || PHONE_VALIDATION_MESSAGE,
   });
   const passwordField = form.register("password", {
     validate: (value) => {
@@ -130,10 +85,29 @@ export function AuthForm({ mode }: AuthFormProps) {
   const formError =
     form.formState.errors.phone?.message ?? form.formState.errors.password?.message ?? apiError;
 
+  const setPhoneValue = (value: string, nationalDigitCaretIndex: number) => {
+    form.setValue("phone", value, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
+    form.clearErrors("phone");
+
+    window.requestAnimationFrame(() => {
+      const input = phoneInputRef.current;
+
+      if (!input) {
+        return;
+      }
+
+      const caretPosition = getCaretPositionForNationalDigitIndex(value, nationalDigitCaretIndex);
+      input.setSelectionRange(caretPosition, caretPosition);
+    });
+  };
+
   const onSubmit = form.handleSubmit(async (values) => {
     setApiError(null);
 
-    const phone = normalizePhoneForApi(values.phone);
+    const phone = normalizePhone(values.phone);
 
     try {
       if (mode === "login") {
@@ -171,19 +145,56 @@ export function AuthForm({ mode }: AuthFormProps) {
           inputMode="tel"
           maxLength={18}
           aria-invalid={Boolean(form.formState.errors.phone)}
+          {...phoneField}
+          onKeyDown={(event) => {
+            const input = event.currentTarget;
+            const selectionStart = input.selectionStart ?? 0;
+            const selectionEnd = input.selectionEnd ?? selectionStart;
+
+            if (selectionStart !== selectionEnd) {
+              return;
+            }
+
+            const digitIndexToRemove = getMaskDigitRemovalIndex(
+              event.key,
+              input.value,
+              selectionStart,
+            );
+
+            if (digitIndexToRemove === null) {
+              return;
+            }
+
+            event.preventDefault();
+            setPhoneValue(
+              removeNationalDigitAt(phoneValue, digitIndexToRemove),
+              digitIndexToRemove,
+            );
+            setApiError(null);
+          }}
+          onBeforeInput={(event) => {
+            const input = event.nativeEvent as InputEvent;
+
+            if (input.data && !isAllowedPhoneInput(input.data)) {
+              event.preventDefault();
+            }
+          }}
           onChange={(event) => {
-            form.setValue("phone", formatPhoneInput(event.currentTarget.value), {
-              shouldDirty: true,
-              shouldValidate: true,
-            });
+            const input = event.currentTarget;
+
+            setPhoneValue(
+              formatPhoneInput(input.value),
+              getNationalDigitCaretIndex(input.value, input.selectionStart ?? input.value.length),
+            );
             setApiError(null);
           }}
           placeholder="+7 (999) 999-99-99"
           type="tel"
           value={phoneValue}
-          name={phoneField.name}
-          onBlur={phoneField.onBlur}
-          ref={phoneField.ref}
+          ref={(element) => {
+            phoneField.ref(element);
+            phoneInputRef.current = element;
+          }}
         />
       </div>
 
@@ -201,6 +212,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {...passwordField}
           onChange={(event) => {
             passwordField.onChange(event);
+            form.clearErrors("password");
             setApiError(null);
           }}
         />
