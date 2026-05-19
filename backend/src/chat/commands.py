@@ -64,13 +64,13 @@ async def _upsert_reminder(
         except (ValueError, TypeError):
             logger.warning('Invalid time value from AI: %s', time_raw)
 
-    if parsed_time.tzinfo is None:
+    if parsed_time is not None and parsed_time.tzinfo is None:
         parsed_time = parsed_time.replace(tzinfo=settings.DEFAULT_TZ)
 
     reminder.reminder_type = payload['reminder_type']
     reminder.med_name = payload.get('med_name')
     reminder.time = parsed_time
-    reminder.days = payload.get('days', [])
+    reminder.days = payload.get('days') or []
     reminder.is_active = True
 
     await db.commit()

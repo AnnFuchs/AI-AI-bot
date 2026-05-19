@@ -28,7 +28,9 @@ class Reminder(CommonMixin, Base):
     time: Mapped[dt_time | None] = mapped_column(
         Time(timezone=True), nullable=True,
     )
-    days: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    days: Mapped[list] = mapped_column(
+        JSON, default=list, server_default='[]', nullable=False,
+    )
 
 
 class PushSubscription(CommonMixin, Base):

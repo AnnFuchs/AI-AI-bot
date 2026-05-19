@@ -12,7 +12,7 @@ class ReminderOut(BaseModel):
     reminder_type: str
     med_name: str | None
     time: dt_time | None
-    days: list
+    days: list = []
     is_active: bool
     created_at: datetime
 

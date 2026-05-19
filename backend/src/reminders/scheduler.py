@@ -16,7 +16,7 @@ from src.reminders.scheduler_service import (
     get_opted_in_users_with_subscriptions,
 )
 
-scheduler = AsyncIOScheduler(timezone='UTC')
+scheduler = AsyncIOScheduler(timezone=settings.DEFAULT_TZ)
 
 
 async def _send_push(
