@@ -111,8 +111,8 @@ class AuthService:
         try:
             payload = jwt.decode(
                 token,
-                settings.jwt_auth_data['secret_key'],
-                algorithms=[settings.jwt_auth_data['algorithm']],
+                settings.jwt_auth_data['SECRET_KEY'],
+                algorithms=[settings.jwt_auth_data['ALGORITHM']],
             )
         except ExpiredSignatureError:
             raise HTTPException(
@@ -142,8 +142,8 @@ class AuthService:
         try:
             payload = jwt.decode(
                 token,
-                settings.jwt_auth_data['secret_key'],
-                algorithms=[settings.jwt_auth_data['algorithm']],
+                settings.jwt_auth_data['SECRET_KEY'],
+                algorithms=[settings.jwt_auth_data['ALGORITHM']],
                 options={"verify_exp": False},
             )
             return payload.get('jti')
@@ -155,8 +155,8 @@ class AuthService:
         try:
             payload = jwt.decode(
                 token,
-                settings.jwt_auth_data['secret_key'],
-                algorithms=[settings.jwt_auth_data['algorithm']],
+                settings.jwt_auth_data['SECRET_KEY'],
+                algorithms=[settings.jwt_auth_data['ALGORITHM']],
                 options={"verify_exp": False},
             )
             sub = payload.get('sub')
