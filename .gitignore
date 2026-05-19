@@ -122,7 +122,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-infra/.env
+backend/infra/.env
+ai_layer/.env
 .venv
 .bot_venv
 .backend_venv
@@ -171,4 +172,4 @@ cython_debug/
 .ruff_cache
 
 #Pg data
-*/pgdata
+backend/infra/pgdata
