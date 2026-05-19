@@ -27,6 +27,7 @@ async def _send_push(
     data = json.dumps({'title': title, 'body': body})
     try:
         await asyncio.get_event_loop().run_in_executor(
+            None,
             lambda: webpush(
                 subscription_info={
                     'endpoint': subscription.endpoint,
