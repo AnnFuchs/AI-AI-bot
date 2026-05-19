@@ -94,7 +94,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_BASE_URL: https://ai-ai.sytes.net/api/v1
+        NEXT_PUBLIC_API_BASE_URL: http://localhost/api/v1  # https://ai-ai.sytes.net/api/v1
         NEXT_PUBLIC_API_INCLUDE_CREDENTIALS: "true"
     container_name: aiai_frontend
     depends_on:
