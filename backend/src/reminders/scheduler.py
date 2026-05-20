@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import base64
 import json
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -24,7 +23,6 @@ async def _send_push(
     title: str,
     body: str,
 ) -> None:
-    data = json.dumps({'title': title, 'body': body})
     try:
         await asyncio.get_event_loop().run_in_executor(
             None,
@@ -36,13 +34,14 @@ async def _send_push(
                         'auth': subscription.auth,
                     },
                 },
-                data=data,
-                vapid_private_key=base64.b64decode(
-                    settings.VAPID_PRIVATE_KEY.get_secret_value(),
-                ).decode('utf-8'),
+                data=json.dumps({'title': title, 'body': body}),
+                vapid_private_key=(
+                    settings.VAPID_PRIVATE_KEY.get_secret_value()
+                ),
                 vapid_claims={'sub': settings.VAPID_CLAIMS_EMAIL},
             ),
         )
+        logger.debug('Push sent.')
     except WebPushException as e:
         if e.response and e.response.status_code == 410:
             logger.info(
@@ -51,6 +50,8 @@ async def _send_push(
             await delete_push_subscription_by_id(subscription.id)
         else:
             logger.warning('Web push failed: %s', e)
+    except Exception as e:
+        logger.warning('Web push failed: %s', e)
 
 
 async def check_reminders() -> None:
@@ -59,16 +60,18 @@ async def check_reminders() -> None:
 
     for reminder in reminders:
         if not reminder.user.push_subscriptions:
+            logger.debug('Push subscription not found')
             continue
 
         if reminder.reminder_type == 'medication':
-            title = 'Medication reminder'
-            body = f"Time to take {reminder.med_name or 'your medication'}."
+            title = 'Оповещение о лекарстве'
+            body = f"Время принять {reminder.med_name or 'ваше лекарство'}."
         else:
-            title = 'Reminder'
-            body = f"Time for: {reminder.reminder_type}"
+            title = 'Оповещение'
+            body = f"Время для: {reminder.reminder_type}"
 
         for subscription in reminder.user.push_subscriptions:
+            logger.debug('Ready to send push')
             await _send_push(subscription, title, body)
 
 
@@ -90,7 +93,11 @@ async def send_daily_checkins() -> None:
 def start_scheduler() -> None:
     """Start scheduler."""
     scheduler.add_job(
-        check_reminders, 'interval', minutes=1, id='check_reminders',
+        check_reminders,
+        'interval',
+        minutes=1,
+        misfire_grace_time=5,
+        id='check_reminders',
     )
     scheduler.add_job(
         send_daily_checkins,

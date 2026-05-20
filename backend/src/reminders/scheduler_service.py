@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.core.constants import DAY_NAMES
+from src.core.logger import logger
 from src.db.session import AsyncSessionLocal
 from src.reminders.models import PushSubscription, Reminder
 from src.users.models import User
@@ -28,14 +29,19 @@ async def get_active_reminders_due_now() -> list[Reminder]:
             ),
         )
         reminders = result.scalars().all()
+        logger.debug(f'Найдены оповещения: {reminders}')
 
     due = []
     for reminder in reminders:
+        logger.debug(f'Время оповещения {reminder.time}')
+
         if not reminder.time:
             continue
 
         tz = pytz.timezone(reminder.user.timezone)
         now_local = now_utc.astimezone(tz)
+
+        logger.debug(f'Сейчас {tz}, {now_local}')
 
         if (
             reminder.time.hour != now_local.hour

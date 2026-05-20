@@ -1,17 +1,10 @@
 from __future__ import annotations
 
-import base64
 from uuid import UUID
 
-from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    PublicFormat,
-    load_pem_public_key,
-)
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import settings
 from src.reminders.models import PushSubscription, Reminder
 
 
@@ -88,14 +81,3 @@ async def remove_push_subscription(
     if sub:
         await db.delete(sub)
         await db.commit()
-
-
-def get_decoded_vapid_public_key() -> str:
-    """Return raw EC public key as base64url for applicationServerKey."""
-    pem = base64.b64decode(settings.VAPID_PUBLIC_KEY.get_secret_value())
-    public_key = load_pem_public_key(pem)
-    raw_bytes = public_key.public_bytes(
-        Encoding.X962,
-        PublicFormat.UncompressedPoint,
-    )
-    return base64.urlsafe_b64encode(raw_bytes).rstrip(b'=').decode('ascii')
