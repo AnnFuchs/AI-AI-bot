@@ -33,18 +33,6 @@ async def get_reminders(
     return await get_user_reminders(user.id, db)
 
 
-@router.delete('/{reminder_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_reminder(
-    reminder_id: uuid.UUID,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_session),
-) -> None:
-    """Delete reminder."""
-    reminder = await deactivate_reminder(reminder_id, user.id, db)
-    if not reminder:
-        raise HTTPException(status_code=404, detail='Reminder not found')
-
-
 @router.get('/vapid-public-key', response_model=VapidPublicKeyOut)
 async def get_vapid_public_key() -> VapidPublicKeyOut:
     """Frontend needs this to subscribe to push notifications."""
@@ -72,3 +60,15 @@ async def delete_push_subscription(
 ) -> None:
     """Call when user disables notifications."""
     await remove_push_subscription(user.id, payload.endpoint, db)
+
+
+@router.delete('/{reminder_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_reminder(
+    reminder_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_session),
+) -> None:
+    """Delete reminder."""
+    reminder = await deactivate_reminder(reminder_id, user.id, db)
+    if not reminder:
+        raise HTTPException(status_code=404, detail='Reminder not found')
