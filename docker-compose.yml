@@ -54,9 +54,7 @@ services:
     restart: unless-stopped
 
   ai-layer:
-    build:
-      context: ./ai_layer
-      dockerfile: Dockerfile
+    image: annfuchs/aiai-ai-layer:1.0
     container_name: aiai_ai_layer
     env_file:
       - ai_layer/.env
@@ -72,9 +70,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: annfuchs/aiai-backend:1.0
     container_name: aiai_backend
     env_file:
       - backend/infra/.env
@@ -90,12 +86,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: http://localhost/api/v1  # https://ai-ai.sytes.net/api/v1
-        NEXT_PUBLIC_API_INCLUDE_CREDENTIALS: "true"
+    image: annfuchs/aiai-frontend:1.0
     container_name: aiai_frontend
     depends_on:
       - backend
