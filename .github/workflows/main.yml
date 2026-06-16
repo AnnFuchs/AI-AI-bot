@@ -142,7 +142,7 @@ jobs:
 
       - name: Add runner IP to security group
         run: |
-          yc vpc security-group add-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
+          yc vpc security-group update-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
             --rule "direction=ingress,port=22,protocol=tcp,cidr=${{ steps.ip.outputs.ipv4 }}/32"
 
       - name: Copy docker-compose.yml via ssh
@@ -153,6 +153,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: 'docker-compose.yml'
           target: '/home/malonowar/AI-AI-bot/'
+
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
@@ -164,3 +165,12 @@ jobs:
             docker compose -f docker-compose.yml pull
             docker compose -f docker-compose.yml down
             docker compose -f docker-compose.yml up -d
+
+      - name: Remove runner IP from security group
+        if: always()
+        run: |
+          RULE_ID=$(yc vpc security-group get ${{ secrets.YC_SECURITY_GROUP_ID }} \
+            --format json | jq -r \
+            '.rules[] | select(.cidr_blocks.v4_cidr_blocks[] == "${{ steps.ip.outputs.ipv4 }}/32" and .ports.from_port == 22) | .id')
+          yc vpc security-group update-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
+            --delete-rule-id "$RULE_ID"
