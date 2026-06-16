@@ -143,7 +143,7 @@ jobs:
       - name: Add runner IP to security group
         run: |
           yc vpc security-group update-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
-            --add-rule "direction=ingress,port=22,protocol=tcp,cidr=${{ steps.ip.outputs.ipv4 }}/32"
+            --add-rule "direction=ingress,port=22,protocol=tcp,v4-cidrs=${{ steps.ip.outputs.ipv4 }}/32"
 
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
@@ -169,12 +169,9 @@ jobs:
       - name: Remove runner IP from security group
         if: always()
         run: |
-          # Print full JSON to see actual structure
-          yc vpc security-group get ${{ secrets.YC_SECURITY_GROUP_ID }} --format json | jq '.rules[]'
-          
           RULE_ID=$(yc vpc security-group get ${{ secrets.YC_SECURITY_GROUP_ID }} \
             --format json | jq -r \
-            '.rules[] | select(.cidr_blocks.v4_cidr_blocks[] == "${{ steps.ip.outputs.ipv4 }}/32") | .id')
+            '.rules[] | select(.cidr_blocks.v4_cidr_blocks | arrays | any(. == "${{ steps.ip.outputs.ipv4 }}/32")) | .id')
           
           echo "Found RULE_ID: $RULE_ID"
           
