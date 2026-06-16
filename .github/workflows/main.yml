@@ -173,8 +173,6 @@ jobs:
             --format json | jq -r \
             '.rules[] | select(.cidr_blocks.v4_cidr_blocks | arrays | any(. == "${{ steps.ip.outputs.ipv4 }}/32")) | .id')
           
-          echo "Found RULE_ID: $RULE_ID"
-          
           if [ -n "$RULE_ID" ]; then
             yc vpc security-group update-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
               --delete-rule-id "$RULE_ID"
