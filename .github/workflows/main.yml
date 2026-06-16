@@ -124,6 +124,27 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
+      - name: Get runner public IP
+        id: ip
+        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+
+      - name: Authenticate YC CLI
+        run: |
+          echo '${{ secrets.YC_SA_KEY }}' > sa-key.json
+          yc config set service-account-key sa-key.json
+          yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
+
+      - name: Add runner IP to security group
+        run: |
+          yc vpc security-group add-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
+            --rule "direction=ingress,port=22,protocol=tcp,cidr=${{ steps.ip.outputs.ipv4 }}/32"
+
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
         with:
