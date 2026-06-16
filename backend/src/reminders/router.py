@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import get_current_user
+from src.core.config import settings
 from src.db.session import get_async_session
 from src.reminders.router_service import (
     deactivate_reminder,
-    get_decoded_vapid_public_key,
     get_user_reminders,
     remove_push_subscription,
     upsert_push_subscription,
@@ -36,7 +36,9 @@ async def get_reminders(
 @router.get('/vapid-public-key', response_model=VapidPublicKeyOut)
 async def get_vapid_public_key() -> VapidPublicKeyOut:
     """Frontend needs this to subscribe to push notifications."""
-    return VapidPublicKeyOut(public_key=get_decoded_vapid_public_key())
+    return VapidPublicKeyOut(
+        public_key=settings.VAPID_PUBLIC_KEY.get_secret_value(),
+    )
 
 
 @router.post('/push-subscription', status_code=status.HTTP_201_CREATED)
