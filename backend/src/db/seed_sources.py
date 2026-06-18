@@ -1,11 +1,14 @@
+import logging
+
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.logger import logger
 from src.sources.data import SOURCES
 from src.sources.errors import DuplicateInfoError
 from src.sources.schemas import SourceCreate
 from src.sources.service import source_service
+
+logger = logging.getLogger(__name__)
 
 
 async def seed_sources(session: AsyncSession) -> None:

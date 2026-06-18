@@ -173,3 +173,6 @@ cython_debug/
 
 #Pg data
 backend/infra/pgdata
+
+#Logs
+backend/logs

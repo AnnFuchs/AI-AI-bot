@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import time as dt_time
 
@@ -6,12 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
 from src.core.constants import EntryType
-from src.core.logger import logger
 from src.diary.schemas import DiaryEntryCreate
 from src.diary.service import diary_service
 from src.reminders.models import Reminder
 from src.sources.models import Source
 from src.users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 async def handle_backend_commands(

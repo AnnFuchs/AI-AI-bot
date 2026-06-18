@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import AsyncGenerator
 
 import httpx
@@ -11,11 +12,11 @@ from src.chat.commands import get_sources, handle_backend_commands
 from src.chat.context import build_user_context
 from src.chat.schemas import ChatRequest
 from src.core.config import settings
-from src.core.logger import logger
 from src.db.session import get_async_session
 from src.users.models import User
 
 router = APIRouter(prefix='/chat', tags=['Chat'])
+logger = logging.getLogger(__name__)
 
 
 @router.post('/stream')

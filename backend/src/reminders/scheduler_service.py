@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from uuid import UUID
 
@@ -8,10 +9,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.core.constants import DAY_NAMES
-from src.core.logger import logger
 from src.db.session import AsyncSessionLocal
 from src.reminders.models import PushSubscription, Reminder
 from src.users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 async def get_active_reminders_due_now() -> list[Reminder]:

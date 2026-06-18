@@ -1,10 +1,13 @@
+import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import settings
-from src.core.logger import logger
 from src.users.errors import DuplicateInfoError
 from src.users.schemas import AdminUserCreate
 from src.users.service import user_service
+
+logger = logging.getLogger(__name__)
 
 
 async def create_first_admin(

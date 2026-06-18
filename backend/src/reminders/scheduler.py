@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pywebpush import WebPushException, webpush
 
 from src.core.config import settings
-from src.core.logger import logger
 from src.reminders.models import PushSubscription
 from src.reminders.scheduler_service import (
     delete_push_subscription_by_id,
@@ -15,6 +15,7 @@ from src.reminders.scheduler_service import (
     get_opted_in_users_with_subscriptions,
 )
 
+logger = logging.getLogger(__name__)
 scheduler = AsyncIOScheduler(timezone=settings.DEFAULT_TZ)
 
 

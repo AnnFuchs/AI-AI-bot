@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from uuid import UUID
 
@@ -10,9 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.auth.models import RefreshToken
 from src.auth.password import verify_password
 from src.core.config import settings
-from src.core.logger import logger
 from src.users.models import User
 from src.users.service import user_service
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService:

@@ -1,3 +1,4 @@
+import logging
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (
@@ -7,8 +8,8 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.core.config import settings
-from src.core.logger import logger
 
+logger = logging.getLogger(__name__)
 engine = create_async_engine(settings.database_url)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 

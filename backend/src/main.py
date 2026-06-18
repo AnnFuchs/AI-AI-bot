@@ -1,3 +1,5 @@
+from src.core import logger  # noqa F401 - configures logging
+
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
