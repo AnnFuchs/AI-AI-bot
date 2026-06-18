@@ -52,6 +52,7 @@ class EntryType(StrEnum):
     BLOOD_TEST = 'blood_test'
     MEDICATION = 'medication'
     SYMPTOM = 'symptom'
+    EXERCISE = 'exercise'
 
 
 class AgeGroup(StrEnum):

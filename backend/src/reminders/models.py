@@ -4,7 +4,8 @@ from datetime import time as dt_time
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import JSON, ForeignKey, String, Text, Time
+from sqlalchemy import ForeignKey, String, Text, Time
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.base import Base, CommonMixin
@@ -29,7 +30,7 @@ class Reminder(CommonMixin, Base):
         Time(timezone=True), nullable=True,
     )
     days: Mapped[list] = mapped_column(
-        JSON, default=list, server_default='[]', nullable=False,
+        JSONB, default=list, server_default='[]', nullable=False,
     )
 
 
