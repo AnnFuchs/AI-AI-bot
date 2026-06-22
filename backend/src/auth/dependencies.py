@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -15,6 +16,7 @@ from src.core.constants import (
 from src.db.session import get_async_session
 from src.users.models import User
 
+logger = logging.getLogger(__name__)
 security = HTTPBearer(bearerFormat=TOKEN_FORMAT, scheme_name=TOKEN_TYPE)
 
 
@@ -32,26 +34,32 @@ async def get_current_user(
             algorithms=[auth_data['ALGORITHM']],
         )
     except ExpiredSignatureError:
+        logger.warning('Expired token provided')
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Token expired.',
         )
     except JWTError:
+        logger.warning('Invalid JWT token provided')
         raise CREDENTIALS_EXCEPTIONS
 
     sub = payload.get('sub')
     if not sub:
+        logger.warning('Token payload missing "sub" claim')
         raise CREDENTIALS_EXCEPTIONS
 
     try:
         user_id = UUID(sub)
     except ValueError:
+        logger.warning('Token "sub" claim is not a valid UUID: %s', sub)
         raise CREDENTIALS_EXCEPTIONS
 
     user = await session.get(User, user_id)
     if not user:
+        logger.warning('No user found for token sub: %s', user_id)
         raise CREDENTIALS_EXCEPTIONS
     if not user.is_active:
+        logger.warning('Inactive user attempted access: %s', user_id)
         raise ACCOUNT_INACTIVE_EXCEPTIONS
 
     return user
