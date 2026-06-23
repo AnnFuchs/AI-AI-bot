@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.reminders.models import PushSubscription, Reminder
+
+logger = logging.getLogger(__name__)
 
 
 async def get_user_reminders(
@@ -18,7 +21,12 @@ async def get_user_reminders(
             Reminder.is_active,
         ),
     )
-    return result.scalars().all()
+    reminders = list(result.scalars().all())
+    logger.debug(
+        'Retrieved %d reminders for user %s',
+        len(reminders), user_id,
+    )
+    return reminders
 
 
 async def deactivate_reminder(
@@ -33,11 +41,22 @@ async def deactivate_reminder(
     )
     reminder = result.scalar_one_or_none()
     if not reminder:
+        logger.debug('Reminder %s not found for user %s', reminder_id, user_id)
         return None
     if not reminder.is_active:
+        logger.warning(
+            'Reminder %s for user %s is already inactive',
+            reminder_id,
+            user_id,
+        )
         return None
     reminder.is_active = False
     await db.commit()
+    logger.info(
+        'Reminder %s for user %s successfully deactivated',
+        reminder_id,
+        user_id,
+    )
     return reminder
 
 
@@ -65,6 +84,7 @@ async def upsert_push_subscription(
         ))
 
     await db.commit()
+    logger.info('Push subscription upserted for user %s', user_id)
 
 
 async def remove_push_subscription(
@@ -81,3 +101,10 @@ async def remove_push_subscription(
     if sub:
         await db.delete(sub)
         await db.commit()
+        logger.info(
+            'Push subscription %s deleted for user %s',
+            sub.id,
+            user_id,
+        )
+    else:
+        logger.warning('Push subscription not found for user %s', user_id)

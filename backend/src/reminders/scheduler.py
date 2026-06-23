@@ -61,7 +61,10 @@ async def check_reminders() -> None:
 
     for reminder in reminders:
         if not reminder.user.push_subscriptions:
-            logger.debug('Push subscription not found')
+            logger.debug(
+                'Push subscription not found for user %s',
+                reminder.user_id,
+            )
             continue
 
         if reminder.reminder_type == 'medication':
