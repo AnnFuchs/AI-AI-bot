@@ -60,25 +60,17 @@ async def build_event_stream(
                         sources = await get_sources(
                             event.get('payload', {}), db,
                         )
-                        events_yielded += 1
-                        yield (
-                            f'data: {
-                                json.dumps(
-                                    {
-                                        'type': 'sources',
-                                        'payload': sources
-                                    }, ensure_ascii=False
-                                )
-                            }\n\n'
+                        payload = json.dumps(
+                            {'type': 'sources', 'payload': sources},
+                            ensure_ascii=False,
                         )
+                        events_yielded += 1
+                        yield f'data: {payload}\n\n'
                         continue
 
                     events_yielded += 1
-                    yield (
-                        f'data: {
-                            json.dumps(event, ensure_ascii=False)
-                        }\n\n'
-                    )
+                    yield f'data: {json.dumps(event, ensure_ascii=False)}\n\n'
+
         logger.info(
             'Chat stream completed | user_id=%s session_id=%s events=%d',
             user_id, session_id, events_yielded,
@@ -87,10 +79,7 @@ async def build_event_stream(
     except httpx.HTTPStatusError as exc:
         body = exc.response.text[:200]
         logger.error(
-            (
-                'AI layer returned error',
-                'user_id=%s session_id=%s status=%s body=%r',
-            ),
+            'AI layer error | user_id=%s session_id=%s status=%s body=%r',
             user_id, session_id, exc.response.status_code, body,
         )
         yield (
