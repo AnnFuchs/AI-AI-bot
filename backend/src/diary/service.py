@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from sqlalchemy import select
@@ -8,9 +9,11 @@ from src.core.constants import EntryType
 from src.diary.models import DiaryEntry
 from src.diary.schemas import DiaryEntryCreate
 
+logger = logging.getLogger(__name__)
+
 
 class DiaryEntryService:
-    """C from CRUD for diary entry."""
+    """CRD from CRUD for diary entry."""
 
     async def get_entries(
         self,
@@ -33,9 +36,13 @@ class DiaryEntryService:
             .limit(limit)
             .offset(offset)
         )
-
         result = await session.execute(query)
-        return list(result.scalars().all())
+        entries = list(result.scalars().all())
+        logger.debug(
+            'Retrieved %d entries for user %s (type=%s, limit=%d, offset=%d)',
+            len(entries), user_id, entry_type, limit, offset,
+        )
+        return entries
 
     async def create_entry(
         self, data: DiaryEntryCreate, user_id: UUID, session: AsyncSession,
@@ -49,7 +56,13 @@ class DiaryEntryService:
 
         try:
             await session.commit()
-        except IntegrityError:
+        except IntegrityError as e:
+            logger.warning(
+                'Failed to create diary entry for user %s (type %s): %s',
+                user_id,
+                data.entry_type,
+                e,
+            )
             await session.rollback()
             raise ValueError(
                 'Failed to create diary entry. '
@@ -57,6 +70,7 @@ class DiaryEntryService:
             )
 
         await session.refresh(entry)
+        logger.info('Diary entry for user %s created successfully', user_id)
         return entry
 
     async def get_entry(
@@ -72,7 +86,10 @@ class DiaryEntryService:
                 DiaryEntry.user_id == user_id,
             ),
         )
-        return result.scalar_one_or_none()
+        entry = result.scalar_one_or_none()
+        if entry is None:
+            logger.debug('Entry %s not found for user %s', entry_id, user_id)
+        return entry
 
     async def delete_entry(
         self,
@@ -82,6 +99,10 @@ class DiaryEntryService:
         """Delete a diary entry."""
         await session.delete(entry)
         await session.commit()
+        logger.info(
+            'Diary entry %s for user %s deleted successfully',
+            entry.id, entry.user_id,
+        )
 
 
 diary_service = DiaryEntryService()
