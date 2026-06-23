@@ -31,7 +31,11 @@ async def handle_backend_commands(
             else:
                 logger.warning('Unknown command type: %s', command_type)
         except Exception:
-            logger.exception('Failed to handle command %s', command_type)
+            logger.exception(
+                'Failed to handle command %s with payload %s',
+                command_type,
+                payload,
+            )
 
 
 async def _upsert_reminder(
@@ -54,20 +58,23 @@ async def _upsert_reminder(
             )
             return
 
+    time_raw = payload.get('time')
+    if not time_raw:
+        logger.warning('Reminder time not found in the payload')
+        raise KeyError('Key "time" not found in payload')
+
+    try:
+        parsed_time = dt_time.fromisoformat(time_raw)
+    except (ValueError, TypeError):
+        logger.warning('Invalid time value from AI: %s', time_raw)
+        raise
+
+    if parsed_time.tzinfo is None:
+        parsed_time = parsed_time.replace(tzinfo=settings.DEFAULT_TZ)
+
     if reminder is None:
         reminder = Reminder(user_id=user.id)
         db.add(reminder)
-
-    time_raw = payload.get('time')
-    parsed_time: dt_time | None = None
-    if time_raw:
-        try:
-            parsed_time = dt_time.fromisoformat(time_raw)
-        except (ValueError, TypeError):
-            logger.warning('Invalid time value from AI: %s', time_raw)
-
-    if parsed_time is not None and parsed_time.tzinfo is None:
-        parsed_time = parsed_time.replace(tzinfo=settings.DEFAULT_TZ)
 
     reminder.reminder_type = payload['reminder_type']
     reminder.med_name = payload.get('med_name')
@@ -77,7 +84,10 @@ async def _upsert_reminder(
 
     await db.commit()
     logger.info(
-        'Reminder upserted for user %s: %s', user.id, reminder.med_name,
+        'Reminder (type: %s, med: %s) upserted for user %s.',
+        reminder.reminder_type,
+        reminder.med_name,
+        user.id,
     )
 
 
