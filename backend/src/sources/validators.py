@@ -1,10 +1,13 @@
+import logging
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.sources.models import Source
 from src.sources.errors import DuplicateInfoError
+from src.sources.models import Source
+
+logger = logging.getLogger(__name__)
 
 
 async def check_source_duplicate(
@@ -45,4 +48,5 @@ async def check_source_duplicate(
             query = query.where(Source.id != exclude_id)
 
         if await session.scalar(query):
+            logger.debug('Duplicate source detected: %s', message)
             raise DuplicateInfoError(message)

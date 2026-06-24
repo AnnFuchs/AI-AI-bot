@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -5,6 +7,8 @@ from src.sources.errors import DuplicateInfoError
 from src.sources.models import Source
 from src.sources.schemas import SourceCreate
 from src.sources.validators import check_source_duplicate
+
+logger = logging.getLogger(__name__)
 
 
 class SourceService:
@@ -26,8 +30,10 @@ class SourceService:
 
         try:
             await session.commit()
+            logger.info('Source %s added', source.source_name)
         except IntegrityError:
             await session.rollback()
+            logger.debug('Source %s already exists', source.source_name)
             raise DuplicateInfoError('Source already exists.')
 
         await session.refresh(source)
