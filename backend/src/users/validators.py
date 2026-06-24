@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -7,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.users.errors import DuplicateInfoError
 from src.users.models import User
 
+logger = logging.getLogger(__name__)
+
 
 async def check_user_exists(user_id: UUID, session: AsyncSession) -> User:
     """Return the user object if it already exists in the database.
@@ -15,6 +18,7 @@ async def check_user_exists(user_id: UUID, session: AsyncSession) -> User:
     """
     user = await session.get(User, user_id)
     if not user:
+        logger.warning('User %s not found', user_id)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found',
@@ -46,4 +50,5 @@ async def check_duplicate(
             query = query.where(User.id != exclude_id)
 
         if await session.scalar(query):
+            logger.warning(message)
             raise DuplicateInfoError(message)
