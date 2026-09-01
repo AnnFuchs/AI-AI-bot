@@ -70,7 +70,7 @@ docker-compose up -d
 - Backend API: http://localhost/api
 - API документация: http://localhost/api/docs
 
-## 🛠️ Разработка
+## Разработка
 
 ### Frontend
 
@@ -227,7 +227,7 @@ NEXT_PUBLIC_API_URL=http://localhost/api
 - OpenAPI Schema: http://localhost/api/openapi.json
 
 
-## 🤝 Вклад в проект
+## Вклад в проект
 
 1. Создайте форк репозитория
 2. Создайте ветку для фичи (`git checkout -b feature/amazing-feature`)
@@ -235,7 +235,7 @@ NEXT_PUBLIC_API_URL=http://localhost/api
 4. Отправьте в ветку (`git push origin feature/amazing-feature`)
 5. Откройте Pull Request
 
-## 📄 Лицензия
+## Лицензия
 
 Этот проект находится в стадии разработки (dev version).
 
@@ -243,7 +243,7 @@ NEXT_PUBLIC_API_URL=http://localhost/api
 
 Этот бот предоставляет информационную поддержку и не заменяет профессиональную медицинскую консультацию. При возникновении медицинских вопросов всегда обращайтесь к квалифицированному специалисту.
 
-## 👥 Команда разработки
+## Команда разработки
 
 ### Разработчики
 - **[Осинский Сергей](https://github.com/osserg18)** — AI-слой и инфраструктура
@@ -257,7 +257,7 @@ NEXT_PUBLIC_API_URL=http://localhost/api
 - **Барбухатти Мария Кирилловна** — Врач-консультант
 - **Комаревский Василий Александрович** — Врач-консультант
 
-## 📧 Контакты
+## Контакты
 
 По вопросам и предложениям создавайте Issues в репозитории проекта.
 
