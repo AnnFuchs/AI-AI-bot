@@ -1,12 +1,12 @@
-# AI-AI Bot 🏥🤖
+# AI-AI Bot
 
 Чат-бот с искусственным интеллектом для консультации и поддержки пациентов, перенесших инсульт, и их родственников.
 
-## 📋 Описание
+## Описание
 
 AI-AI Bot — это интеллектуальная система поддержки, разработанная специально для помощи пациентам после инсульта и их близким. Бот предоставляет информацию и эмоциональную поддержку на основе современных технологий машинного обучения.
 
-## 🏗️ Архитектура проекта
+## Архитектура проекта
 
 Проект построен на микросервисной архитектуре и состоит из следующих компонентов:
 
@@ -30,7 +30,7 @@ AI-AI Bot — это интеллектуальная система подде�
 - **База данных**: PostgreSQL 16
 - **Веб-сервер**: Nginx с поддержкой SSL
 
-## 🚀 Быстрый старт
+## Быстрый старт
 
 ### Требования
 
@@ -123,7 +123,7 @@ uvicorn app.main:app --reload --port 8001
 pytest tests/
 ```
 
-## 🐳 Docker
+## Docker
 
 ### Сборка образов
 
@@ -154,7 +154,7 @@ docker-compose logs -f [service_name]
 docker-compose restart [service_name]
 ```
 
-## 📚 Технологический стек
+## Технологический стек
 
 ### Frontend
 - **Framework**: Next.js 15 (App Router)
@@ -190,7 +190,7 @@ docker-compose restart [service_name]
 - **Containerization**: Docker + Docker Compose
 - **SSL**: Let's Encrypt
 
-## 🔧 Конфигурация
+## Конфигурация
 
 ### Переменные окружения
 
@@ -219,42 +219,13 @@ APP_ENV=production
 NEXT_PUBLIC_API_URL=http://localhost/api
 ```
 
-## 📖 API Документация
+## API Документация
 
 После запуска проекта документация API доступна по адресам:
 - Swagger UI: http://localhost/api/docs
 - ReDoc: http://localhost/api/redoc
 - OpenAPI Schema: http://localhost/api/openapi.json
 
-## 🧪 Тестирование
-
-```bash
-# Backend тесты
-cd backend
-pytest
-
-# AI Layer тесты
-cd ai_layer
-pytest tests/
-
-# Frontend тесты
-cd frontend
-npm test
-```
-
-## 📝 Линтинг и форматирование
-
-```bash
-# Backend (Ruff)
-cd backend
-ruff check .
-ruff format .
-
-# Frontend (ESLint + Prettier)
-cd frontend
-npm run lint
-npm run format
-```
 
 ## 🤝 Вклад в проект
 
