@@ -1,0 +1,181 @@
+name: Main workflow
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      ai_layer: ${{ steps.filter.outputs.ai_layer }}
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            ai_layer:
+              - 'ai_layer/**'
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
+  test-ai-layer:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ai_layer == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ai_layer/requirements.txt
+      - name: Run tests
+        run: pytest ai_layer/tests
+
+  build-ai-layer-and-push-to-hub:
+    needs: [detect-changes, test-ai-layer]
+    if: needs.detect-changes.outputs.ai_layer == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai_layer
+          push: true
+          tags: annfuchs/aiai-ai-layer:latest
+          cache-from: type=registry,ref=annfuchs/aiai-ai-layer:cache
+          cache-to: type=registry,ref=annfuchs/aiai-ai-layer:cache,mode=max
+
+  build-backend-and-push-to-hub:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: annfuchs/aiai-backend:latest
+          cache-from: type=registry,ref=annfuchs/aiai-backend:cache
+          cache-to: type=registry,ref=annfuchs/aiai-backend:cache,mode=max
+
+  build-frontend-and-push-to-hub:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: annfuchs/aiai-frontend:latest
+          cache-from: type=registry,ref=annfuchs/aiai-frontend:cache
+          cache-to: type=registry,ref=annfuchs/aiai-frontend:cache,mode=max
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: 
+      - build-ai-layer-and-push-to-hub
+      - build-backend-and-push-to-hub
+      - build-frontend-and-push-to-hub
+    if: |
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled') &&
+      contains(needs.*.result, 'success')
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Get runner public IP
+        id: ip
+        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
+
+      - name: Authenticate YC CLI
+        run: |
+          echo '${{ secrets.YC_SA_KEY }}' > sa-key.json
+          yc config set service-account-key sa-key.json
+          yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
+
+      - name: Add runner IP to security group
+        run: |
+          yc vpc security-group update-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
+            --add-rule "direction=ingress,port=22,protocol=tcp,v4-cidrs=${{ steps.ip.outputs.ipv4 }}/32"
+
+      - name: Copy docker-compose.yml via ssh
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: 'docker-compose.yml'
+          target: '/home/malonowar/AI-AI-bot/'
+
+      - name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/malonowar/AI-AI-bot/
+            docker compose -f docker-compose.yml pull
+            docker compose -f docker-compose.yml down
+            docker compose -f docker-compose.yml up -d
+
+      - name: Remove runner IP from security group
+        if: always()
+        run: |
+          RULE_ID=$(yc vpc security-group get ${{ secrets.YC_SECURITY_GROUP_ID }} \
+            --format json | jq -r \
+            '.rules[] | select(.cidr_blocks.v4_cidr_blocks | arrays | any(. == "${{ steps.ip.outputs.ipv4 }}/32")) | .id')
+          
+          if [ -n "$RULE_ID" ]; then
+            yc vpc security-group update-rules ${{ secrets.YC_SECURITY_GROUP_ID }} \
+              --delete-rule-id "$RULE_ID"
+          else
+            echo "Rule not found, skipping deletion"
+          fi

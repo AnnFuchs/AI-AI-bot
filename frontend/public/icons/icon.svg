@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Иконка приложения Ай-Яй</title>
+  <rect width="512" height="512" rx="64" fill="#f8fbfb" />
+  <path
+    d="M149 277c0-67 48-121 107-121s107 54 107 121c0 73-72 111-107 137-35-26-107-64-107-137Z"
+    fill="#2f7464"
+  />
+  <circle cx="256" cy="236" r="52" fill="#f7d96b" />
+  <path
+    d="M214 304c18 16 66 16 84 0"
+    fill="none"
+    stroke="#f8fbfb"
+    stroke-linecap="round"
+    stroke-width="24"
+  />
+</svg>

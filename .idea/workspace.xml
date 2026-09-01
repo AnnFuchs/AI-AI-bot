@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/frontend/src/shared/ui/select.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/public/sw.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/sw.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api/mock-adapter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/mock-adapter.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/learn/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/learn/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/app/settings/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/app/settings/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/entities/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/entities/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/entities/profile/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/entities/profile/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/entities/reminder/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/entities/reminder/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/features/onboarding/api/user-service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/features/onboarding/api/user-service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/shared/ui/button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/shared/ui/button.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript JSX File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;luvelayn&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/osserg18/AI-AI-bot.git&quot;,
+    &quot;accountId&quot;: &quot;1f6a37f6-b1f3-4fcf-9f0c-485e1c204e77&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="3CM06qWX1kxX3303V1PpmjZSulG" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.localhost:3000.executor": "Debug",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/frontend",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "C:\\Users\\ktoto\\Documents\\petProjects\\AI-AI-bot\\frontend\\node_modules\\prettier",
+    "settings.editor.selected.configurable": "settings.sync",
+    "ts.external.directory.path": "C:\\Users\\ktoto\\Documents\\petProjects\\AI-AI-bot\\frontend\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\frontend\public\images" />
+      <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\frontend\src\shared\ui" />
+      <recent name="C:\Users\ktoto\Documents\petProjects\AI-AI-bot\src\shared\ui" />
+    </key>
+  </component>
+  <component name="RunManager" selected="JavaScript Debug.localhost:3000">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="localhost:3000" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:3000">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JavaScript Debug.localhost:3000" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-WS-251.26927.40" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8135c9f1-832e-450c-b4e3-18dfa67c8e02" name="Changes" comment="" />
+      <created>1776179959367</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1776179959367</updated>
+      <workItem from="1776179960837" duration="682000" />
+      <workItem from="1776182472823" duration="13620000" />
+      <workItem from="1776267401419" duration="25283000" />
+      <workItem from="1776410153013" duration="102000" />
+      <workItem from="1776419098970" duration="1089000" />
+      <workItem from="1776446543200" duration="16283000" />
+      <workItem from="1776512840542" duration="13738000" />
+      <workItem from="1777402746767" duration="3916000" />
+      <workItem from="1777716745850" duration="15627000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
